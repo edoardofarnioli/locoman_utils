@@ -24,6 +24,62 @@ namespace locoman {
             yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix T_ab);
             
             //------------------------------------------------------------
+      /**
+     * @brief getKq returns the joint stiffness matrix (hardcoded for now)
+     * @return a yarp Matrix of dimension =  robot.getNumberOfJoints() x robot.getNumberOfJoints()
+     */
+    yarp::sig::Matrix getKq_Walkman(RobotUtils& robot ) {
+                            yarp::sig::Vector Kq_vec_right_arm(  robot.right_arm.getNumberOfJoints() ) ;
+                            yarp::sig::Vector Kq_vec_left_arm(   robot.left_arm.getNumberOfJoints() ) ;  
+                            yarp::sig::Vector Kq_vec_torso(      robot.torso.getNumberOfJoints() ) ;
+                            yarp::sig::Vector Kq_vec_right_leg(  robot.right_leg.getNumberOfJoints() ) ;
+                            yarp::sig::Vector Kq_vec_left_leg(   robot.left_leg.getNumberOfJoints() ) ;
+                            // RIGHT ARM    
+                            Kq_vec_right_arm[0] = 1500.0 ; //1000.0 ;
+                            Kq_vec_right_arm[1] = 1500.0 ; //1000.0 ;
+                            Kq_vec_right_arm[2] = 1500.0 ; //600.0 ;
+                            Kq_vec_right_arm[3] = 1500.0 ; //1000.0 ;
+                            Kq_vec_right_arm[4] = 800.0 ; //100.0 ;
+                            Kq_vec_right_arm[5] = 800.0 ; //100.0 ;
+                            Kq_vec_right_arm[6] = 800.0 ; //10.0 ;
+                            // LEFT ARM   
+                            Kq_vec_left_arm[0] = 1500.0 ; //1000.0 ;
+                            Kq_vec_left_arm[1] = 1500.0 ; //1000.0 ;
+                            Kq_vec_left_arm[2] = 1500.0 ; //600.0 ;
+                            Kq_vec_left_arm[3] = 1500.0 ; //1000.0 ;
+                            Kq_vec_left_arm[4] = 800.0 ; //100.0 ;
+                            Kq_vec_left_arm[5] = 800.0 ; //100.0 ;
+                            Kq_vec_left_arm[6] = 800.0 ; //10.0 ;
+                            //TORSO
+                            Kq_vec_torso[0] = 4000.0 ; // 1000.0 ;
+                            Kq_vec_torso[1] = 5500.0 ; // 1000.0 ;
+                            Kq_vec_torso[2] = 4000.0 ; // 1000.0 ;
+                            // RIGHT LEG
+                            Kq_vec_right_leg[0] = 6500.0 ; //3000.0 ;
+                            Kq_vec_right_leg[1] = 1063.0 ; //5000.0 ;
+                            Kq_vec_right_leg[2] = 6500.0 ; //3000.0 ;
+                            Kq_vec_right_leg[3] = 6500.0 ; //3000.0 ;
+                            Kq_vec_right_leg[4] = 6500.0 ; //4000.0 ;
+                            Kq_vec_right_leg[5] = 6500.0 ; //3000.0 ;
+                            // LEFT LEG
+                            Kq_vec_left_leg[0] = 6500.0 ; //3000.0 ;
+                            Kq_vec_left_leg[1] = 1063.0 ; //5000.0 ;
+                            Kq_vec_left_leg[2] = 6500.0 ; //3000.0 ;
+                            Kq_vec_left_leg[3] = 6500.0 ; //3000.0 ;
+                            Kq_vec_left_leg[4] = 6500.0 ; //4000.0 ;
+                            Kq_vec_left_leg[5] = 6500.0 ; //3000.0 ;
+                            //
+                            yarp::sig::Vector Kq_vec( robot.getNumberOfJoints()  )  ;     
+                            robot.fromRobotToIdyn( Kq_vec_right_arm ,
+                                                Kq_vec_left_arm  ,
+                                                Kq_vec_torso  ,
+                                                Kq_vec_right_leg ,
+                                                Kq_vec_left_leg  ,
+                                                Kq_vec ); 
+                            yarp::sig::Matrix Kq_matrix(  robot.getNumberOfJoints(), robot.getNumberOfJoints() )  ; 
+                            Kq_matrix.diagonal(  Kq_vec ) ;
+                            return Kq_matrix ;
+                            }        
     /**
      * @brief getKq returns the joint stiffness matrix (hardcoded for now)
      * @return a yarp Matrix of dimension =  robot.getNumberOfJoints() x robot.getNumberOfJoints()
@@ -88,11 +144,11 @@ namespace locoman {
      */
     yarp::sig::Vector senseMotorPosition(RobotUtils& robot, bool flag_robot ) {
                                         yarp::sig::Vector q_motor( robot.getNumberOfJoints()  )  ; 
-                                        if(flag_robot)
-                                        {
+                                        if(flag_robot){
                                             yarp::sig::Vector q_link = robot.sensePosition() ;
                                             return q_motor ; 
-                                        } 
+                                        }
+                                        else{
                                             yarp::sig::Vector q_link = robot.sensePosition() ;
                                             yarp::sig::Vector tau    = robot.senseTorque() ;
                                             //     
@@ -100,7 +156,8 @@ namespace locoman {
                                             yarp::sig::Matrix Cq_matrix = yarp::math::luinv(Kq_matrix) ;
                                             q_motor = Cq_matrix*tau  + q_link ;
                                             return q_motor ;
-                                            }
+                                        }
+                                        }
         
     //-----------------------------------------------------------
     //-----------------------------------------------------------------
