@@ -21,8 +21,11 @@ endif()
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 FIND_PACKAGE(YARP REQUIRED)
+FIND_PACKAGE(idynutils REQUIRED)
+# to avoid header not found when using idynutils 
+FIND_PACKAGE(Eigen3 REQUIRED)
 
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${idynutils_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 # for every file in INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE ${PROJECT_NAME}_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/locoman/utils" *.h*)
