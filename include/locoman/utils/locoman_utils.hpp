@@ -29,11 +29,13 @@ namespace locoman {
      * @return a yarp Matrix of dimension =  robot.getNumberOfJoints() x robot.getNumberOfJoints()
      */
     yarp::sig::Matrix getKq_Walkman(RobotUtils& robot ) {
-                            yarp::sig::Vector Kq_vec_right_arm(  robot.right_arm.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_left_arm(   robot.left_arm.getNumberOfJoints() ) ;  
-                            yarp::sig::Vector Kq_vec_torso(      robot.torso.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_right_leg(  robot.right_leg.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_left_leg(   robot.left_leg.getNumberOfJoints() ) ;
+                            yarp::sig::Vector Kq_vec_right_arm(  robot.right_arm.getNumberOfJoints()  ) ;
+                            yarp::sig::Vector Kq_vec_left_arm(   robot.left_arm.getNumberOfJoints()   ) ;  
+                            yarp::sig::Vector Kq_vec_torso(      robot.torso.getNumberOfJoints()      ) ;
+                            yarp::sig::Vector Kq_vec_right_leg(  robot.right_leg.getNumberOfJoints()  ) ;
+                            yarp::sig::Vector Kq_vec_left_leg(   robot.left_leg.getNumberOfJoints()   ) ;
+                            yarp::sig::Vector Kq_vec_head(       robot.head.getNumberOfJoints()       ) ;
+                            
                             // RIGHT ARM    
                             Kq_vec_right_arm[0] = 1500.0 ; //1000.0 ;
                             Kq_vec_right_arm[1] = 1500.0 ; //1000.0 ;
@@ -68,6 +70,9 @@ namespace locoman {
                             Kq_vec_left_leg[3] = 6500.0 ; //3000.0 ;
                             Kq_vec_left_leg[4] = 6500.0 ; //4000.0 ;
                             Kq_vec_left_leg[5] = 6500.0 ; //3000.0 ;
+                            // HEAD
+                            Kq_vec_head[0] = 100.0 ;
+                            Kq_vec_head[1] = 500.0 ;
                             //
                             yarp::sig::Vector Kq_vec( robot.getNumberOfJoints()  )  ;     
                             robot.fromRobotToIdyn( Kq_vec_right_arm ,
@@ -75,6 +80,7 @@ namespace locoman {
                                                 Kq_vec_torso  ,
                                                 Kq_vec_right_leg ,
                                                 Kq_vec_left_leg  ,
+                                                Kq_vec_head,
                                                 Kq_vec ); 
                             yarp::sig::Matrix Kq_matrix(  robot.getNumberOfJoints(), robot.getNumberOfJoints() )  ; 
                             Kq_matrix.diagonal(  Kq_vec ) ;
@@ -151,8 +157,16 @@ namespace locoman {
                                         else{
                                             yarp::sig::Vector q_link = robot.sensePosition() ;
                                             yarp::sig::Vector tau    = robot.senseTorque() ;
-                                            //     
-                                            yarp::sig::Matrix Kq_matrix = getKq(robot) ;
+                                            // 
+                                            yarp::sig::Matrix Kq_matrix;
+                                            if(robot.idynutils.getRobotName() == "coman") {
+                                                Kq_matrix = getKq(robot) ;
+                                            }
+                                            else {
+                                                Kq_matrix = getKq_Walkman(robot) ;
+                                            }
+                                            
+                                           // std::cout << Kq_matrix.toString() << std::endl;
                                             yarp::sig::Matrix Cq_matrix = yarp::math::luinv(Kq_matrix) ;
                                             q_motor = Cq_matrix*tau  + q_link ;
                                             return q_motor ;
@@ -171,8 +185,8 @@ namespace locoman {
                                   const int c2_index,
                                   const int c3_index,
                                   const int c4_index,
-                                  iDynUtils model,
-                                  bool flag_robot
+                                  iDynUtils model 
+                                 // bool flag_robot
                                 ) {
                                         yarp::sig::Matrix map_fConToSens( 6 , 12 ) ;
                                         yarp::sig::Matrix B_select( 6 , 3 ) ;
@@ -185,7 +199,7 @@ namespace locoman {
                                         Eye_3.eye() ;
                                         // 
                                         B_select.setSubmatrix( Eye_3 , 0 , 0 ) ;
-                                        if(flag_robot)
+                                        /*if(flag_robot)
                                         {
                                         yarp::sig::Matrix T_w_ankle = model.iDyn3_model.getPosition(sens_index) ;
                                         yarp::sig::Vector d_sens_ankle (3, 0.0) ;
@@ -196,12 +210,11 @@ namespace locoman {
                                         yarp::sig::Matrix T_sensor_w = T_sensor_ankle * T_ankle_w ;
                                         T_w_sensor =  locoman::utils::iHomogeneous(T_sensor_w) ;
                                         //  
-                                        } 
-                                        else
-                                        {
+                                        }*/ 
+                                        // else
+                                        // {
                                         T_w_sensor = model.iDyn3_model.getPosition(sens_index) ;     
-                                        }
-                                       
+                                        //}
                                         //
                                         T_w_c1  = model.iDyn3_model.getPosition(c1_index)  ;
                                         T_w_c2  = model.iDyn3_model.getPosition(c2_index)  ;    

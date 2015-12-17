@@ -24,9 +24,9 @@ namespace locoman {
      * @brief  Q_ci compute the derivative of the spatial Jacobian 
      * @param  J_spa_i is a 6xc yarp matrix describing a spatial Jacobian
      * @param  T_a_ci is the homogeneous transformation between the floating base and the contact frame 
-     * @param  f_ci contact force vector
+     * @param  f_ci contact force vector (3 force elements)
      * @return qxq yarp matrix 
-     */
+     **/
     yarp::sig::Matrix Q_ci( const yarp::sig::Matrix J_spa_i, 
                             const yarp::sig::Matrix T_a_ci , 
                             const yarp::sig::Vector f_ci) {
@@ -48,7 +48,35 @@ namespace locoman {
                                         }   
                                     return Q_c_i ;
                             }
-    
+     /**
+     * @brief  Q_ci_wrench compute the derivative of the spatial Jacobian 
+     * @param  J_spa_i is a 6xc yarp matrix describing a spatial Jacobian
+     * @param  T_a_ci is the homogeneous transformation between the floating base and the contact frame 
+     * @param  w_ci contact force vector (6 elements: forces and couples)
+     * @return qxq yarp matrix 
+     **/
+     yarp::sig::Matrix Q_ci_wrench( const yarp::sig::Matrix J_spa_i, 
+                                    const yarp::sig::Matrix T_a_ci , 
+                                    const yarp::sig::Vector w_ci) {
+                                    
+                                    yarp::sig::Matrix Q_c_i(J_spa_i.cols(), J_spa_i.cols());
+                                    yarp::sig::Vector Q_ci_col_i( J_spa_i.cols() )  ; 
+//                                     yarp::sig::Matrix B(6,3) ;
+//                                     B[0][0] = 1 ;
+//                                     B[1][1] = 1 ;
+//                                     B[2][2] = 1 ;
+                                        for ( int i = 0  ; i<(J_spa_i.cols()) ; i++ )  // i<(J_waist_l_c1_spa_0.cols()-1)
+                                        {
+                                        Q_ci_col_i =  ( locoman::utils::D_Jacob_spa_i(J_spa_i, (i+1)) ).transposed()*
+                                                        ( locoman::utils::Adjoint(
+                                                            locoman::utils::iHomogeneous(T_a_ci))).transposed() *w_ci  +
+                                                        J_spa_i.transposed()* 
+                                                        ( locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_a_ci) )*
+                                                        locoman::utils::ad_lie( -1.0*J_spa_i.getCol(i))).transposed() *w_ci;
+                                        Q_c_i.setCol(i, Q_ci_col_i ) ;       
+                                        }   
+                                    return Q_c_i ;
+                            }
     
     
          //------------------------------------------------------------------------------------
