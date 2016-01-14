@@ -351,7 +351,7 @@ namespace locoman {
         * @param  f_min is the minimum module of the force allowed
         * @return the value of sigma_min
         */
-            double sigma_min( const yarp::sig::Vector fc,
+        double sigma_min( const yarp::sig::Vector fc,
                                 const double f_min 
                                             ) {
                                         yarp::sig::Vector fc_aux = fc ;
@@ -549,6 +549,30 @@ namespace locoman {
                                     if(alpha>(1.0-tol)) { alpha = 1.0 ; }   
                                     return alpha ;
                                         }  
+                                        
+     /**
+     * @brief Joint_Trajectory 
+     * @param robot is the robot model
+     * @param flag_robot (bool) 1 if you are using the code on the real robot, 0 if you using the simulator
+     * @param q_motor_current current joint configuration (motor side)
+     * @param q_des desired joint configuration
+     * @param steps (int) number of steps of trajectory
+     * @return a yarp vector of dimension equal to robot.getNumberOfJoints() 
+     */
+    bool Joint_Trajectory(RobotUtils& robot, const bool flag_robot, const yarp::sig::Vector q_motor_current, const yarp::sig::Vector q_des, const int steps = 300.0 ) {
+              
+/*              yarp::sig::Vector q_motor_current = locoman::utils::senseMotorPosition(robot, flag_robot) ; // this function uses manually imposed joint stiffness values             
+                yarp::sig::Vector q_des(robot.getNumberOfJoints() ) ;     */               
+                //if(1-flag_robot){steps = 100.0 ; } //faster on the simulator
+                
+                double steps_aux = steps ; // This is helpful to avoid casting to int the subsequent division 
+                yarp::sig::Vector d_q_des = (q_des - q_motor_current); //
+                for(int i = 1; i <steps_aux+1; i++){
+                    robot.move( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
+                    usleep(50*1000) ;
+                }
+        return 0 ;
+    }                                        
      
      
         }
