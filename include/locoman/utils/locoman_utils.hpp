@@ -14,7 +14,12 @@
 // #include <locoman/utils/locoman_utils.hpp>
 #include <locoman/utils/algebra.hpp>
 
-
+#define RIGHT_ARM_JOINT_NUM 7
+#define LEFT_ARM_JOINT_NUM 7
+#define TORSO_JOINT_NUM 3
+#define RIGHT_LEG_JOINT_NUM 6
+#define LEFT_LEG_JOINT_NUM 6
+#define HEAD_JOINT_NUM 2
 
 namespace locoman {
         namespace utils {
@@ -23,18 +28,39 @@ namespace locoman {
             yarp::sig::Matrix iHomogeneous( const yarp::sig::Matrix T_ab);
             yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix T_ab);
             
+            
+            yarp::sig::Vector sense_position_no_hands(RobotUtils& robot) {
+                yarp::sig::Vector wb_input_q = robot.sensePosition();
+                yarp::sig::Vector input_q_no_hands(robot.getNumberOfKinematicJoints());
+
+                for(int i=0;i<input_q_no_hands.size();i++) {
+                    input_q_no_hands[i]=wb_input_q[i]; //hands not considered
+                }
+                return input_q_no_hands;
+            }
+            
+            yarp::sig::Vector sense_torque_no_hands(RobotUtils& robot) {
+                    yarp::sig::Vector wb_input_tau = robot.senseTorque();
+                    yarp::sig::Vector input_tau_no_hands(robot.getNumberOfKinematicJoints());
+
+                    for(int i=0;i<input_tau_no_hands.size();i++) {
+                        input_tau_no_hands[i]=wb_input_tau[i]; //hands not considered
+                    }
+                    return input_tau_no_hands;
+            }
+            
             //------------------------------------------------------------
       /**
      * @brief getKq returns the joint stiffness matrix (hardcoded for now)
      * @return a yarp Matrix of dimension =  robot.getNumberOfJoints() x robot.getNumberOfJoints()
      */
     yarp::sig::Matrix getKq_Walkman(RobotUtils& robot ) {
-                            yarp::sig::Vector Kq_vec_right_arm(  robot.right_arm.getNumberOfJoints()  ) ;
-                            yarp::sig::Vector Kq_vec_left_arm(   robot.left_arm.getNumberOfJoints()   ) ;  
-                            yarp::sig::Vector Kq_vec_torso(      robot.torso.getNumberOfJoints()      ) ;
-                            yarp::sig::Vector Kq_vec_right_leg(  robot.right_leg.getNumberOfJoints()  ) ;
-                            yarp::sig::Vector Kq_vec_left_leg(   robot.left_leg.getNumberOfJoints()   ) ;
-                            yarp::sig::Vector Kq_vec_head(       robot.head.getNumberOfJoints()       ) ;
+                            yarp::sig::Vector Kq_vec_right_arm(  RIGHT_ARM_JOINT_NUM  ) ;
+                            yarp::sig::Vector Kq_vec_left_arm(   LEFT_ARM_JOINT_NUM   ) ;  
+                            yarp::sig::Vector Kq_vec_torso(      TORSO_JOINT_NUM      ) ;
+                            yarp::sig::Vector Kq_vec_right_leg(  RIGHT_LEG_JOINT_NUM  ) ;
+                            yarp::sig::Vector Kq_vec_left_leg(   LEFT_LEG_JOINT_NUM   ) ;
+                            yarp::sig::Vector Kq_vec_head(       HEAD_JOINT_NUM       ) ;
                             
                             // RIGHT ARM    
                             Kq_vec_right_arm[0] = 1500.0 ; //1000.0 ;
@@ -74,15 +100,15 @@ namespace locoman {
                             Kq_vec_head[0] = 100.0 ;
                             Kq_vec_head[1] = 500.0 ;
                             //
-                            yarp::sig::Vector Kq_vec( robot.getNumberOfJoints()  )  ;     
-                            robot.fromRobotToIdyn( Kq_vec_right_arm ,
+                            yarp::sig::Vector Kq_vec( robot.getNumberOfActuatedJoints()  )  ;     
+                            robot.fromRobotToIdyn31( Kq_vec_right_arm ,
                                                 Kq_vec_left_arm  ,
                                                 Kq_vec_torso  ,
                                                 Kq_vec_right_leg ,
                                                 Kq_vec_left_leg  ,
                                                 Kq_vec_head,
                                                 Kq_vec ); 
-                            yarp::sig::Matrix Kq_matrix(  robot.getNumberOfJoints(), robot.getNumberOfJoints() )  ; 
+                            yarp::sig::Matrix Kq_matrix(  robot.getNumberOfKinematicJoints(), robot.getNumberOfKinematicJoints() )  ; 
                             Kq_matrix.diagonal(  Kq_vec ) ;
                             return Kq_matrix ;
                             }        
@@ -91,11 +117,11 @@ namespace locoman {
      * @return a yarp Matrix of dimension =  robot.getNumberOfJoints() x robot.getNumberOfJoints()
      */
     yarp::sig::Matrix getKq(RobotUtils& robot ) {
-                            yarp::sig::Vector Kq_vec_right_arm(  robot.right_arm.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_left_arm(   robot.left_arm.getNumberOfJoints() ) ;  
-                            yarp::sig::Vector Kq_vec_torso(      robot.torso.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_right_leg(  robot.right_leg.getNumberOfJoints() ) ;
-                            yarp::sig::Vector Kq_vec_left_leg(   robot.left_leg.getNumberOfJoints() ) ;
+                            yarp::sig::Vector Kq_vec_right_arm(  RIGHT_ARM_JOINT_NUM ) ;
+                            yarp::sig::Vector Kq_vec_left_arm(   LEFT_ARM_JOINT_NUM ) ;  
+                            yarp::sig::Vector Kq_vec_torso(      TORSO_JOINT_NUM ) ;
+                            yarp::sig::Vector Kq_vec_right_leg(  RIGHT_LEG_JOINT_NUM ) ;
+                            yarp::sig::Vector Kq_vec_left_leg(   LEFT_LEG_JOINT_NUM ) ;
                             // RIGHT ARM    
                             Kq_vec_right_arm[0] = 1000.0 ;
                             Kq_vec_right_arm[1] = 1000.0 ;
@@ -131,14 +157,14 @@ namespace locoman {
                             Kq_vec_left_leg[4] = 4000.0 ;
                             Kq_vec_left_leg[5] = 3000.0 ;
                             //
-                            yarp::sig::Vector Kq_vec( robot.getNumberOfJoints()  )  ;     
-                            robot.fromRobotToIdyn( Kq_vec_right_arm ,
+                            yarp::sig::Vector Kq_vec( robot.getNumberOfKinematicJoints()  )  ;     
+                            robot.fromRobotToIdyn29( Kq_vec_right_arm ,
                                                 Kq_vec_left_arm  ,
                                                 Kq_vec_torso  ,
                                                 Kq_vec_right_leg ,
                                                 Kq_vec_left_leg  ,
                                                 Kq_vec ); 
-                            yarp::sig::Matrix Kq_matrix(  robot.getNumberOfJoints(), robot.getNumberOfJoints() )  ; 
+                            yarp::sig::Matrix Kq_matrix(  robot.getNumberOfKinematicJoints(), robot.getNumberOfKinematicJoints() )  ; 
                             Kq_matrix.diagonal(  Kq_vec ) ;
                             return Kq_matrix ;
                             }
@@ -149,14 +175,14 @@ namespace locoman {
      * @return a yarp vector of dimension equal to robot.getNumberOfJoints() 
      */
     yarp::sig::Vector senseMotorPosition(RobotUtils& robot, bool flag_robot ) {
-                                        yarp::sig::Vector q_motor( robot.getNumberOfJoints()  )  ; 
+                                        yarp::sig::Vector q_motor( robot.getNumberOfKinematicJoints()  )  ; 
                                         if(flag_robot){
-                                            yarp::sig::Vector q_link = robot.sensePosition() ;
-                                            return q_motor ; 
+                                            yarp::sig::Vector q_link = sense_position_no_hands(robot) ;
+                                            return q_link ; 
                                         }
                                         else{
-                                            yarp::sig::Vector q_link = robot.sensePosition() ;
-                                            yarp::sig::Vector tau    = robot.senseTorque() ;
+                                            yarp::sig::Vector q_link = sense_position_no_hands(robot) ;
+                                            yarp::sig::Vector tau    = sense_torque_no_hands(robot) ;
                                             // 
                                             yarp::sig::Matrix Kq_matrix;
                                             if(robot.idynutils.getRobotName() == "coman") {
@@ -421,9 +447,9 @@ namespace locoman {
                                    yarp::sig::Vector right_leg_configuration,
                                    yarp::sig::Vector left_leg_configuration 
                                 ) {
-                                        yarp::sig::Vector q_motor_init(robot.getNumberOfJoints() ) ;                
+                                        yarp::sig::Vector q_motor_init(robot.getNumberOfKinematicJoints() ) ;                
 
-                                        robot.fromRobotToIdyn(  right_arm_configuration ,
+                                        robot.fromRobotToIdyn29(  right_arm_configuration ,
                                                                 left_arm_configuration  ,
                                                                 torso_configuration     ,
                                                                 right_leg_configuration ,
@@ -504,16 +530,16 @@ namespace locoman {
                                          RobotUtils& robot,
                                          bool flag_robot
     ) {
-                                            yarp::sig::Vector q_ref_ToMove(robot.right_arm.getNumberOfJoints()) ; 
-                                            yarp::sig::Vector q_ref_ToMove_right_arm(robot.left_arm.getNumberOfJoints()) ;
-                                            yarp::sig::Vector q_ref_ToMove_left_arm(robot.left_arm.getNumberOfJoints()) ;
-                                            yarp::sig::Vector q_ref_ToMove_torso(robot.torso.getNumberOfJoints()) ;
-                                            yarp::sig::Vector q_ref_ToMove_right_leg(robot.right_leg.getNumberOfJoints()) ;
-                                            yarp::sig::Vector q_ref_ToMove_left_leg(robot.left_leg.getNumberOfJoints()) ;
+                                            yarp::sig::Vector q_ref_ToMove(RIGHT_ARM_JOINT_NUM) ; 
+                                            yarp::sig::Vector q_ref_ToMove_right_arm(RIGHT_ARM_JOINT_NUM) ;
+                                            yarp::sig::Vector q_ref_ToMove_left_arm(LEFT_ARM_JOINT_NUM) ;
+                                            yarp::sig::Vector q_ref_ToMove_torso(TORSO_JOINT_NUM) ;
+                                            yarp::sig::Vector q_ref_ToMove_right_leg(RIGHT_LEG_JOINT_NUM) ;
+                                            yarp::sig::Vector q_ref_ToMove_left_leg(LEFT_LEG_JOINT_NUM) ;
                                         
                                             q_ref_ToMove =  senseMotorPosition(robot, flag_robot)  ;
 
-                                            robot.fromIdynToRobot(  q_ref_ToMove,
+                                            robot.fromRobotToIdyn29(  q_ref_ToMove,
                                                                     q_ref_ToMove_right_arm,
                                                                     q_ref_ToMove_left_arm,
                                                                     q_ref_ToMove_torso,
@@ -522,7 +548,7 @@ namespace locoman {
 
                                             q_ref_ToMove_right_arm[0] += alpha ;  
                                             
-                                            robot.fromRobotToIdyn( q_ref_ToMove_right_arm ,
+                                            robot.fromRobotToIdyn29( q_ref_ToMove_right_arm ,
                                                                 q_ref_ToMove_left_arm  ,
                                                                 q_ref_ToMove_torso     ,
                                                                 q_ref_ToMove_right_leg ,
@@ -548,7 +574,12 @@ namespace locoman {
                                     if(alpha<tol )    { alpha = 0.0 ; } 
                                     if(alpha>(1.0-tol)) { alpha = 1.0 ; }   
                                     return alpha ;
-                                        }  
+                                        }
+                                        
+      
+      
+                                        
+
      
      
         }
