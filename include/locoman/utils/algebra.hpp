@@ -27,7 +27,7 @@ namespace locoman {
      * @param  k number of decimal places 
      * @return rounded yarp matrix 
      */
-    yarp::sig::Matrix RoundMatrix( const yarp::sig::Matrix M, const int k) {
+    yarp::sig::Matrix RoundMatrix( const yarp::sig::Matrix& M, const int k) {
           yarp::sig::Matrix Round_M = M ;
   for( int i=0 ; i<Round_M.cols(); i++) {
       for( int j=0 ; j<Round_M.rows(); j++){
@@ -47,7 +47,7 @@ return Round_M ;
      * @param  k is the maximum ratio admitted between the max and min singular values
      * @return Pinv_trunc_SVD is the pseudo-inverse of A
      */
-      yarp::sig::Matrix Pinv_trunc_SVD( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix Pinv_trunc_SVD( const yarp::sig::Matrix& A ,
                                         const double k = 1E-4 
                                       ) {
   int r_A = A.rows() ;
@@ -84,7 +84,7 @@ return Round_M ;
      * @param  k is the regularization factor
      * @return Pinv_Regularized is the pseudo-inverse of A
      */ 
-      yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix& A ,
                                           const double k  
                                         ) {
                                             int r_A = A.rows() ;
@@ -109,7 +109,7 @@ return Round_M ;
      * @param  k is the regularization factor
      * @return Pinv_Marq is the pseudo-inverse of A
      */ 
-      yarp::sig::Matrix Pinv_Marq( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix Pinv_Marq( const yarp::sig::Matrix& A ,
                                           const double k  
                                         ) {
                                     int r_A = A.rows() ;
@@ -145,8 +145,8 @@ return Round_M ;
      * @param  n is the maximum number of steps to be performed (less that the minimum dimension of A)
      * @return x_Pinv_Iter is the solution vetor
      */
-      yarp::sig::Vector x_Pinv_Iter( const yarp::sig::Matrix A , 
-                                   const yarp::sig::Vector b , 
+      yarp::sig::Vector x_Pinv_Iter( const yarp::sig::Matrix& A , 
+                                   const yarp::sig::Vector& b , 
                                    double n 
                                    ) {
                                     int r_A = A.rows() ;
@@ -174,7 +174,7 @@ return Round_M ;
      * @param  k is the maximum ratio admitted between the max and min singular values
      * @return orth_SVD is a basis for the span of A
      */
-      yarp::sig::Matrix orth_SVD( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix orth_SVD( const yarp::sig::Matrix& A ,
                                         const double k = 1E-4 
                                       ) {
                                             int r_A = A.rows() ;
@@ -210,7 +210,7 @@ return Round_M ;
      * @param  k is the maximum ratio admitted between the max and min singular values
      * @return null_SVD is a basis for the nullspace of A
      */
-      yarp::sig::Matrix null_SVD( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix null_SVD( const yarp::sig::Matrix& A ,
                                         const double k = 1E-4 
                                       ) {
                                             int r_A = A.rows() ;
@@ -247,7 +247,7 @@ return Round_M ;
      * @param  k is the maximum ratio admitted between the max and min singular values
      * @return filter_SVD is the filtered version of A
      */
-      yarp::sig::Matrix filter_SVD( const yarp::sig::Matrix A ,
+      yarp::sig::Matrix filter_SVD( const yarp::sig::Matrix& A ,
                                         const double k = 1E-4 
                                       ) {
                                             int r_A = A.rows() ;

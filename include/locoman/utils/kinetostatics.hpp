@@ -16,9 +16,9 @@ namespace locoman {
         namespace utils {
             
             // pre declaration
-            yarp::sig::Matrix D_Jacob_spa_i( const yarp::sig::Matrix J_s, const int i );
-            yarp::sig::Matrix Adjoint( const yarp::sig::Matrix T_ab);
-            yarp::sig::Matrix ad_lie( const yarp::sig::Vector Xi);
+            yarp::sig::Matrix D_Jacob_spa_i( const yarp::sig::Matrix& J_s, const int i );
+            yarp::sig::Matrix Adjoint( const yarp::sig::Matrix& T_ab);
+            yarp::sig::Matrix ad_lie( const yarp::sig::Vector& Xi);
                      //----------------------------------------------------------------------------
      /**
      * @brief  Q_ci compute the derivative of the spatial Jacobian 
@@ -27,9 +27,9 @@ namespace locoman {
      * @param  f_ci contact force vector (3 force elements)
      * @return qxq yarp matrix 
      **/
-    yarp::sig::Matrix Q_ci( const yarp::sig::Matrix J_spa_i, 
-                            const yarp::sig::Matrix T_a_ci , 
-                            const yarp::sig::Vector f_ci) {
+    yarp::sig::Matrix Q_ci( const yarp::sig::Matrix& J_spa_i, 
+                            const yarp::sig::Matrix& T_a_ci , 
+                            const yarp::sig::Vector& f_ci) {
                                   yarp::sig::Matrix Q_c_i(J_spa_i.cols(), J_spa_i.cols());
                                     yarp::sig::Vector Q_ci_col_i( J_spa_i.cols() )  ; 
                                     yarp::sig::Matrix B(6,3) ;
@@ -55,9 +55,9 @@ namespace locoman {
      * @param  w_ci contact force vector (6 elements: forces and couples)
      * @return qxq yarp matrix 
      **/
-     yarp::sig::Matrix Q_ci_wrench( const yarp::sig::Matrix J_spa_i, 
-                                    const yarp::sig::Matrix T_a_ci , 
-                                    const yarp::sig::Vector w_ci) {
+     yarp::sig::Matrix Q_ci_wrench( const yarp::sig::Matrix& J_spa_i, 
+                                    const yarp::sig::Matrix& T_a_ci , 
+                                    const yarp::sig::Vector& w_ci) {
                                     
                                     yarp::sig::Matrix Q_c_i(J_spa_i.cols(), J_spa_i.cols());
                                     yarp::sig::Vector Q_ci_col_i( J_spa_i.cols() )  ; 
@@ -92,14 +92,14 @@ namespace locoman {
      * @param  K_q is a joints x joints yarp matrix describing the joint stiffness matrix
      * @return FLMM_ext is the Fundamental Loco-Manipulation Matrix
      */
-    yarp::sig::Matrix FLMM_ext( const yarp::sig::Matrix J_c ,
-                            const yarp::sig::Matrix S_c ,
-                            const yarp::sig::Matrix Q_j,
-                            const yarp::sig::Matrix Q_s,
-                            const yarp::sig::Matrix U_j,
-                            const yarp::sig::Matrix U_s,
-                            const yarp::sig::Matrix K_c,
-                            const yarp::sig::Matrix K_q
+    yarp::sig::Matrix FLMM_ext( const yarp::sig::Matrix& J_c ,
+                                const yarp::sig::Matrix& S_c ,
+                                const yarp::sig::Matrix& Q_j,
+                                const yarp::sig::Matrix& Q_s,
+                                const yarp::sig::Matrix& U_j,
+                                const yarp::sig::Matrix& U_s,
+                                const yarp::sig::Matrix& K_c,
+                                const yarp::sig::Matrix& K_q
                               ) {
                                     int size_fc  = J_c.rows();
                                     int size_q  = J_c.cols() ;
@@ -163,14 +163,14 @@ namespace locoman {
      * @param  K_q is a joints x joints yarp matrix describing the joint stiffness matrix
      * @return Rf_ext computes the joint-forces map
      */
-    yarp::sig::Matrix Rf_ext( const yarp::sig::Matrix J_c ,
-                            const yarp::sig::Matrix S_c ,
-                            const yarp::sig::Matrix Q_j,
-                            const yarp::sig::Matrix Q_s,
-                            const yarp::sig::Matrix U_j,
-                            const yarp::sig::Matrix U_s,
-                            const yarp::sig::Matrix K_c,
-                            const yarp::sig::Matrix K_q
+    yarp::sig::Matrix Rf_ext(   const yarp::sig::Matrix& J_c ,
+                                const yarp::sig::Matrix& S_c ,
+                                const yarp::sig::Matrix& Q_j,
+                                const yarp::sig::Matrix& Q_s,
+                                const yarp::sig::Matrix& U_j,
+                                const yarp::sig::Matrix& U_s,
+                                const yarp::sig::Matrix& K_c,
+                                const yarp::sig::Matrix& K_q
                               ) {
                                     yarp::sig::Matrix Q_j_1 = -1.0*Q_j - 1.0* J_c.transposed()*K_c*J_c  ;
                                     yarp::sig::Matrix U_j_1 = -1.0*U_j -1.0*J_c.transposed() *K_c*S_c.transposed() ;    
@@ -194,11 +194,11 @@ namespace locoman {
      * @param  K_c is a contacts x contacts yarp matrix describing the contact stiffness matrix
      * @return FLMM_ext is the Fundamental Loco-Manipulation Matrix
      */
-    yarp::sig::Matrix FLMM_redu( const yarp::sig::Matrix J_c ,
-                            const yarp::sig::Matrix S_c ,
-                            const yarp::sig::Matrix Q_s,
-                            const yarp::sig::Matrix U_s,
-                            const yarp::sig::Matrix K_c
+    yarp::sig::Matrix FLMM_redu( const yarp::sig::Matrix& J_c ,
+                                 const yarp::sig::Matrix& S_c ,
+                                 const yarp::sig::Matrix& Q_s,
+                                 const yarp::sig::Matrix& U_s,
+                                 const yarp::sig::Matrix& K_c
                               ) {
                                     int size_fc  = J_c.rows();
                                     int size_q  = J_c.cols() ;
@@ -227,11 +227,11 @@ namespace locoman {
      * @param  K_c is a contacts x contacts yarp matrix describing the contact stiffness matrix
      * @return Rf_redu is the Fundamental Loco-Manipulation Matrix
      */
-    yarp::sig::Matrix Rf_redu( const yarp::sig::Matrix J_c ,
-                            const yarp::sig::Matrix S_c ,
-                            const yarp::sig::Matrix Q_s,
-                            const yarp::sig::Matrix U_s,
-                            const yarp::sig::Matrix K_c
+    yarp::sig::Matrix Rf_redu(  const yarp::sig::Matrix& J_c ,
+                                const yarp::sig::Matrix& S_c ,
+                                const yarp::sig::Matrix& Q_s,
+                                const yarp::sig::Matrix& U_s,
+                                const yarp::sig::Matrix& K_c
                               ) {
                                     yarp::sig::Matrix Q_s_1 =  Q_s +  S_c*K_c*J_c  ;
                                     yarp::sig::Matrix U_s_1 =  U_s + S_c*K_c*S_c.transposed() ;    
@@ -250,11 +250,11 @@ namespace locoman {
      * @param  K_c is a contacts x contacts yarp matrix describing the contact stiffness matrix
      * @return Ru_redu is the Fundamental Loco-Manipulation Matrix
      */
-    yarp::sig::Matrix Ru_redu( const yarp::sig::Matrix J_c ,
-                            const yarp::sig::Matrix S_c ,
-                            const yarp::sig::Matrix Q_s,
-                            const yarp::sig::Matrix U_s,
-                            const yarp::sig::Matrix K_c
+    yarp::sig::Matrix Ru_redu(  const yarp::sig::Matrix& J_c ,
+                                const yarp::sig::Matrix& S_c ,
+                                const yarp::sig::Matrix& Q_s,
+                                const yarp::sig::Matrix& U_s,
+                                const yarp::sig::Matrix& K_c
                               ) {
                                     yarp::sig::Matrix Q_s_1 =  -1.0*Q_s-1.0*S_c*K_c*J_c  ;
                                     yarp::sig::Matrix U_s_1 = -1.0*U_s-1.0*S_c*K_c*S_c.transposed() ;    

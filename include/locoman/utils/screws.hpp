@@ -19,7 +19,7 @@ namespace locoman {
                     * @param  T_ab is a 4x4 yarp matrix describing a homogenous transformation
                     * @return R_ab is a 3x3 yarp matrix
                     */
-                    yarp::sig::Matrix getRot( const yarp::sig::Matrix T_ab) {
+                    yarp::sig::Matrix getRot( const yarp::sig::Matrix& T_ab) {
                                                 yarp::sig::Matrix R_ab( 3 , 3 ) ;  
                                                 R_ab = T_ab.submatrix(0,2,0,2) ;
                                                 return R_ab ;
@@ -31,7 +31,7 @@ namespace locoman {
                     * @param  T_ab is a 4x4 yarp matrix describing a homogenous transformation
                     * @return d_ab  is a 3x1 yarp vector 
                     */
-                    yarp::sig::Vector getTrasl( const yarp::sig::Matrix T_ab) {
+                    yarp::sig::Vector getTrasl( const yarp::sig::Matrix& T_ab) {
                             yarp::sig::Matrix d_ab_mat( 3, 1 ) ;  
                             d_ab_mat = T_ab.submatrix(0,2,3, 3) ;   
                             yarp::sig::Vector d_ab( 3  ) ;  
@@ -48,7 +48,7 @@ namespace locoman {
                     * @param  d_ab is a 3x1 yarp vector describing the translational part   
                     * @return T_ab is a 4x4 yarp matrix 
                     */
-                    yarp::sig::Matrix Homogeneous( const yarp::sig::Matrix R_ab,  const yarp::sig::Vector d_ab  ) {
+                    yarp::sig::Matrix Homogeneous( const yarp::sig::Matrix& R_ab,  const yarp::sig::Vector& d_ab  ) {
                         
                         yarp::sig::Matrix T_ab( 4 , 4 ) ;
                         yarp::sig::Matrix d_ab_mat( 3 , 1 ) ;
@@ -68,7 +68,7 @@ namespace locoman {
      * @param  T_ab is a 4x4 yarp matrix describing an homogenous transformation
      * @return T_ba  is a 4x4 yarp matrix, the inverse of T_ab
      */
-    yarp::sig::Matrix iHomogeneous( const yarp::sig::Matrix T_ab) {
+    yarp::sig::Matrix iHomogeneous( const yarp::sig::Matrix& T_ab) {
                     
                         yarp::sig::Matrix T_ba( 4 , 4 ) ;  
                         yarp::sig::Matrix R_ab( 3 , 3 ) ; 
@@ -92,7 +92,7 @@ namespace locoman {
      * @param  T_ab is a 4x4 yarp matrix describing an homogenous transformation
      * @return Ad_T_ab is a 6x6 yarp matrix, able to map twists in twists
      */
-    yarp::sig::Matrix Adjoint( const yarp::sig::Matrix T_ab) {    yarp::sig::Matrix Adj( 6 , 6 ) ;
+    yarp::sig::Matrix Adjoint( const yarp::sig::Matrix& T_ab) {    yarp::sig::Matrix Adj( 6 , 6 ) ;
                                 yarp::sig::Matrix R_ab( 3 , 3 ) ; 
                                 yarp::sig::Vector d_ab( 3  ) ;  
                                 yarp::sig::Matrix d_ab_skew( 3 , 3 )   ;
@@ -115,7 +115,7 @@ namespace locoman {
      * @param  T_ab is a 4x4 yarp matrix describing an homogenous transformation
      * @return ( Ad_(T_ab)^{-1} )^{T}  is a 6x6 yarp matrix, able to map wrenches in wrenches
      */
-    yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix T_ab) {
+    yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix& T_ab) {
                                 yarp::sig::Matrix Adj_MT( 6 , 6 ) ;
                                 yarp::sig::Matrix R_ab( 3 , 3 ) ; 
                                 yarp::sig::Vector d_ab( 3  ) ;  
@@ -138,7 +138,7 @@ namespace locoman {
      * @param  xi is a 6 dimentional yarp vector describing a twits = [v^T, w^T]^T
      * @return 4x4 yarp matrix describing the homogenous form of a the twist xi
      */
-    yarp::sig::Matrix xi_hat( const yarp::sig::Vector xi) {
+    yarp::sig::Matrix xi_hat( const yarp::sig::Vector& xi) {
                                 yarp::sig::Vector vel = xi.subVector(0,2)   ;
                                 yarp::sig::Vector omega  = xi.subVector(3,5)  ;
                                 yarp::sig::Matrix vel_matr(3,1)  ;
@@ -158,7 +158,7 @@ namespace locoman {
      * @param  theta is the rotation amount
      * @return 4x4 yarp matrix describing the homogenous form of a the twist xi
      */
-    yarp::sig::Matrix exp_omega_theta( const yarp::sig::Vector omega, const double theta) {
+    yarp::sig::Matrix exp_omega_theta( const yarp::sig::Vector& omega, const double theta) {
                                                 yarp::sig::Matrix Eye_3(3,3) ;
                                                 Eye_3.eye() ;
                                                 yarp::sig::Matrix R(3,3) ;
@@ -177,7 +177,7 @@ namespace locoman {
      * @param  theta is the transformation amount
      * @return 4x4 yarp matrix describing the homogenous transformation
      */
-    yarp::sig::Matrix twistexp( const yarp::sig::Vector xi, const double theta) {
+    yarp::sig::Matrix twistexp( const yarp::sig::Vector& xi, const double theta) {
                                             yarp::sig::Matrix Eye_3(3,3) ;
                                             Eye_3.eye() ;
                                             yarp::sig::Vector vel = xi.subVector(0,2)   ;
@@ -208,7 +208,7 @@ namespace locoman {
      * @param  Xi is a 6x1 yarp matrix describing a twist
      * @return 6xc yarp matrix 
      */
-    yarp::sig::Matrix ad_lie( const yarp::sig::Matrix Xi) {
+    yarp::sig::Matrix ad_lie( const yarp::sig::Matrix& Xi) {
                                     if(!(Xi.rows() == 6)) std::cout << "ERROR DIMENSIONS OF Xi" << std::endl; 
                                     if(!(Xi.cols() == 1)) std::cout << "ERROR DIMENSIONS OF Xi" << std::endl; 
                                     yarp::sig::Vector v(3) ;
@@ -231,7 +231,7 @@ namespace locoman {
                                     return AD_LIE ;
     }
     
-    yarp::sig::Matrix ad_lie( const yarp::sig::Vector Xi) {
+    yarp::sig::Matrix ad_lie( const yarp::sig::Vector& Xi) {
                                 if(!(Xi.length() == 6)) std::cout << "ERROR DIMENSIONS OF Xi" << std::endl; 
                                 yarp::sig::Vector v(3) ;
                                 yarp::sig::Vector omega(3) ;
@@ -259,7 +259,7 @@ namespace locoman {
      * @param  i -th joint () with repect to the derivative is computed 
      * @return 6x6 yarp matrix describing the Lie adjoint matrix
      */
-    yarp::sig::Matrix D_Jacob_spa_i( const yarp::sig::Matrix J_s, const int i ) {
+    yarp::sig::Matrix D_Jacob_spa_i( const yarp::sig::Matrix& J_s, const int i ) {
                                                     
                                         int r_J = J_s.rows() ;
                                         int c_J = J_s.cols() ;
@@ -295,7 +295,7 @@ namespace locoman {
      * @param  Adj is a 6x6 yarp matrix describing an Adjoint transformation
      * @return 4x4 yarp matrix describing a homogenous transformation
      */
-    yarp::sig::Matrix AdjToPose( const yarp::sig::Matrix Adj) {
+    yarp::sig::Matrix AdjToPose( const yarp::sig::Matrix& Adj) {
                                         yarp::sig::Matrix T(4,4) ;
                                         T.setSubmatrix( Adj.submatrix(0,2,0,2), 0,0 ); // = Adj.submatrix(0,2,0,2) ;
                                         yarp::sig::Matrix R = locoman::utils::getRot(T)  ;

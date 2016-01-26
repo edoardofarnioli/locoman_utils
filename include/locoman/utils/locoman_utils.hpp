@@ -24,13 +24,13 @@
 namespace locoman {
         namespace utils {
             // pre declaration 
-            yarp::sig::Matrix Homogeneous( const yarp::sig::Matrix R_ab,  const yarp::sig::Vector d_ab  );
-            yarp::sig::Matrix iHomogeneous( const yarp::sig::Matrix T_ab);
-            yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix T_ab);
+            yarp::sig::Matrix Homogeneous( const yarp::sig::Matrix& R_ab,  const yarp::sig::Vector& d_ab  );
+            yarp::sig::Matrix iHomogeneous( const yarp::sig::Matrix& T_ab);
+            yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix& T_ab);
             
             
             yarp::sig::Vector sense_position_no_hands(RobotUtils& robot) {
-                yarp::sig::Vector wb_input_q = robot.sensePosition();
+                yarp::sig::Vector wb_input_q = robot.sensePositionRefFeedback();
                 yarp::sig::Vector input_q_no_hands(robot.getNumberOfKinematicJoints());
 
                 for(int i=0;i<input_q_no_hands.size();i++) {
@@ -211,7 +211,7 @@ namespace locoman {
                                   const int c2_index,
                                   const int c3_index,
                                   const int c4_index,
-                                  iDynUtils model 
+                                  iDynUtils& model 
                                  // bool flag_robot
                                 ) {
                                         yarp::sig::Matrix map_fConToSens( 6 , 12 ) ;
@@ -264,7 +264,7 @@ namespace locoman {
      * @brief The function computes and returns the pose of the frame auxiliary world frame {AW} with 
      * @return respect to the world
      */
-     yarp::sig::Matrix AW_world_posture( iDynUtils model , 
+     yarp::sig::Matrix AW_world_posture( iDynUtils& model , 
                                          RobotUtils& robot  ) {
                                                     yarp::sig::Vector zero_3(3, 0.0) ;
                                                     int imu_link_index = model.iDyn3_model.getLinkIndex("imu_link") ; 
@@ -355,7 +355,7 @@ namespace locoman {
      * @param  mu is the friction coefficient
      * @return the value of sigma_frict
      */
-      double sigma_frict( const yarp::sig::Vector fc ,
+      double sigma_frict( const yarp::sig::Vector& fc ,
                           const double mu 
                                       ) {
                                         yarp::sig::Vector fc_aux = fc ;
@@ -377,7 +377,7 @@ namespace locoman {
         * @param  f_min is the minimum module of the force allowed
         * @return the value of sigma_min
         */
-            double sigma_min( const yarp::sig::Vector fc,
+            double sigma_min( const yarp::sig::Vector& fc,
                                 const double f_min 
                                             ) {
                                         yarp::sig::Vector fc_aux = fc ;
@@ -399,7 +399,7 @@ namespace locoman {
      * @param  f_max is the maximum module of the force allowed
      * @return the value of sigma_min
      */
-      double sigma_max( const yarp::sig::Vector fc,
+      double sigma_max( const yarp::sig::Vector& fc,
                         const double f_max 
                                       ) {
                                             yarp::sig::Vector fc_aux = fc ;
@@ -441,11 +441,11 @@ namespace locoman {
         * @return  yarp vector 
         */
         yarp::sig::Vector q_init(  RobotUtils& robot,
-                                   yarp::sig::Vector right_arm_configuration,
-                                   yarp::sig::Vector left_arm_configuration, 
-                                   yarp::sig::Vector torso_configuration, 
-                                   yarp::sig::Vector right_leg_configuration,
-                                   yarp::sig::Vector left_leg_configuration 
+                                   yarp::sig::Vector& right_arm_configuration,
+                                   yarp::sig::Vector& left_arm_configuration, 
+                                   yarp::sig::Vector& torso_configuration, 
+                                   yarp::sig::Vector& right_leg_configuration,
+                                   yarp::sig::Vector& left_leg_configuration 
                                 ) {
                                         yarp::sig::Vector q_motor_init(robot.getNumberOfKinematicJoints() ) ;                
 
@@ -585,7 +585,11 @@ namespace locoman {
      * @param steps (int) number of steps of trajectory
      * @return a yarp vector of dimension equal to robot.getNumberOfJoints() 
      */
-    bool Joint_Trajectory(RobotUtils& robot, const bool flag_robot, const yarp::sig::Vector q_motor_current, const yarp::sig::Vector q_des, const int steps = 300.0 ) {
+    bool Joint_Trajectory(RobotUtils& robot, 
+                          const bool flag_robot,
+                          const yarp::sig::Vector& q_motor_current,
+                          const yarp::sig::Vector& q_des,
+                          const int steps = 300.0 ) {
               
 /*              yarp::sig::Vector q_motor_current = locoman::utils::senseMotorPosition(robot, flag_robot) ; // this function uses manually imposed joint stiffness values             
                 yarp::sig::Vector q_des(robot.getNumberOfJoints() ) ;     */               
@@ -594,13 +598,30 @@ namespace locoman {
                 double steps_aux = steps ; // This is helpful to avoid casting to int the subsequent division 
                 yarp::sig::Vector d_q_des = (q_des - q_motor_current); //
                 for(int i = 1; i <steps_aux+1; i++){
-                    robot.move( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
-                    usleep(50*1000) ;
+                    robot.move29( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
+                   
+                    usleep(30*1000) ;
                 }
         return 0 ;
     }                                        
      
      
+     /**
+     * @brief Tic fucntion for tic-toc matlab style
+     * @return the tic time
+     */
+    double Tic( ) {
+        double tt_tic = std::clock() ;
+        return tt_tic ;              
+            }   
+          /**
+     * @brief 
+     * @return the tic-toc time (seconds)
+     */
+    double Toc( double tt_tic ) {
+        double tt_toc =  ( std::clock() - tt_tic ) / ( CLOCKS_PER_SEC )  ;
+        return tt_toc ;              
+            }       
         }
 }
 #endif

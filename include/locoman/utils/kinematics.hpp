@@ -16,8 +16,8 @@ namespace locoman {
         namespace utils {
             
             // pre declaration
-            yarp::sig::Vector getTrasl( const yarp::sig::Matrix T_ab);
-            yarp::sig::Matrix getRot( const yarp::sig::Matrix T_ab);
+            yarp::sig::Vector getTrasl( const yarp::sig::Matrix& T_ab);
+            yarp::sig::Matrix getRot( const yarp::sig::Matrix& T_ab);
             
                  //-----------------------------------------------------------------
      /**
@@ -25,7 +25,7 @@ namespace locoman {
      * @param  Skew is a 3x3 yarp matrix describing an cross product
      * @return 3x1 yarp vector
      */
-    yarp::sig::Vector SkewToVect( const yarp::sig::Matrix Skew) {
+    yarp::sig::Vector SkewToVect( const yarp::sig::Matrix& Skew) {
                                             yarp::sig::Vector Vect(3) ;
                                             Vect[0] = Skew[2][1] ;
                                             Vect[1] = Skew[0][2] ;
@@ -38,7 +38,7 @@ namespace locoman {
      * @param  Rot is 3 x 3 rotation matrix
      * @return a vector of 4 elements; the first element is the scalar part of the quaternion
      */
-    yarp::sig::Vector Rot2Quat( const yarp::sig::Matrix Rot) {
+    yarp::sig::Vector Rot2Quat( const yarp::sig::Matrix& Rot) {
                                         double tol = 0.001 ;
                                         double r_11 = Rot[0][0] ;
                                         double r_12 = Rot[0][1] ;
@@ -83,8 +83,8 @@ namespace locoman {
      * @param  Rot_cur is 3 x 3 rotation matrix representing the current orientation
      * @return a vector of 3 elements representing the orientation error
      */
-    yarp::sig::Vector Orient_Error( const yarp::sig::Matrix Rot_des,
-                                    const yarp::sig::Matrix Rot_cur) {
+    yarp::sig::Vector Orient_Error( const yarp::sig::Matrix& Rot_des,
+                                    const yarp::sig::Matrix& Rot_cur) {
                                         yarp::sig::Vector q_des = Rot2Quat(Rot_des) ;
                                         yarp::sig::Vector q_cur = Rot2Quat(Rot_cur) ;
                                         double eta_des = q_des[0] ;
@@ -100,7 +100,7 @@ namespace locoman {
      * @param  quat is 4 elements vector describing a quaternion
      * @return a vector of 4 elements representing the inverse of the input quaternion
      */
-    yarp::sig::Vector Inv_quaternion( const yarp::sig::Vector quat ) {
+    yarp::sig::Vector Inv_quaternion( const yarp::sig::Vector& quat ) {
                                             yarp::sig::Vector e_inv = -1.0*quat.subVector(1,3) ;
                                             yarp::sig::Vector quat_inv(4,0.0) ;  
                                             quat_inv[0] = quat[0] ;
@@ -113,8 +113,8 @@ namespace locoman {
      * @param  quat_1 and quat_2 are 4 elements vectors describing quaternions
      * @return a vector of 4 elements representing the product of the two input quaternions
      */
-    yarp::sig::Vector quat_Product( const yarp::sig::Vector quat_1 , 
-                                    const yarp::sig::Vector quat_2) {
+    yarp::sig::Vector quat_Product( const yarp::sig::Vector& quat_1 , 
+                                    const yarp::sig::Vector& quat_2) {
                                           double eta_1 = quat_1[0] ;
                                             double eta_2 = quat_2[0];
                                             yarp::sig::Vector eps_1 = quat_1.subVector(1,3) ;
@@ -189,16 +189,16 @@ namespace locoman {
      * @return the desired delta_q vector 
      */
     yarp::sig::Vector WB_Cartesian_Tasks( 
-                            const yarp::sig::Matrix T_l_hand_des,
-                            const yarp::sig::Matrix T_r_hand_des,
-                            const yarp::sig::Matrix T_l1_foot_des ,
-                            const yarp::sig::Matrix T_r1_foot_des ,
-                            const yarp::sig::Vector CoM_waist_cmd ,
-                            const yarp::sig::Matrix J_l_hand_body ,
-                            const yarp::sig::Matrix J_r_hand_body ,
-                            const yarp::sig::Matrix J_l1_foot_body ,
-                            const yarp::sig::Matrix J_r1_foot_body ,
-                            const yarp::sig::Matrix J_waist_CoM 
+                            const yarp::sig::Matrix& T_l_hand_des,
+                            const yarp::sig::Matrix& T_r_hand_des,
+                            const yarp::sig::Matrix& T_l1_foot_des ,
+                            const yarp::sig::Matrix& T_r1_foot_des ,
+                            const yarp::sig::Vector& CoM_waist_cmd ,
+                            const yarp::sig::Matrix& J_l_hand_body ,
+                            const yarp::sig::Matrix& J_r_hand_body ,
+                            const yarp::sig::Matrix& J_l1_foot_body ,
+                            const yarp::sig::Matrix& J_r1_foot_body ,
+                            const yarp::sig::Matrix& J_waist_CoM 
                                         ) {
                                         yarp::sig::Matrix Eye_3(3,3); Eye_3.eye() ;
                                         // filtering the error
