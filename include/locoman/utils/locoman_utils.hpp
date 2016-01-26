@@ -281,7 +281,8 @@ namespace locoman {
                                                     double norm_imu = norm(IMU_sense_lin_acc)     ;
                                                     //
                                                     // Defining z-axis for the Auxiliary World => frame {AW} used as world in loop of the run function
-                                                    yarp::sig::Vector z_imu_aw =  IMU_sense_lin_acc/norm_imu ; 
+                                                    yarp::sig::Vector z_imu_aw = -1.0* IMU_sense_lin_acc/norm_imu ;   // Z axis vertical, going up
+
                                                     double norm_z = norm(z_imu_aw)  ;
                                                     
                                                     yarp::sig::Matrix z_imu_aw_matr(3,1);
