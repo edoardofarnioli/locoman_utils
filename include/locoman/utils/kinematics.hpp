@@ -204,7 +204,7 @@ namespace locoman {
                                         // filtering the error
                                         double  max_trasl_err  = 0.001  ;  // maximum displacement allowed in a loop
                                         double  max_orient_err = 0.01   ;  // maximum rotation allowed in a loop
-                                        double  min_trasl_err  = 0.0008 ;  // minimum displacement, otherwise is approximated to zero
+                                        double  min_trasl_err  = 0.00002 ;  // minimum displacement, otherwise is approximated to zero
                                         double  min_orient_err = 0.001  ;  // minimum rotation, otherwise is approximated to zero
                                         
                                         yarp::sig::Vector trasl_l_hand_err   = locoman::utils::getTrasl(T_l_hand_des) ;
