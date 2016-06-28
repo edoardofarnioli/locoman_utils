@@ -19,6 +19,7 @@ namespace locoman {
             yarp::sig::Matrix D_Jacob_spa_i( const yarp::sig::Matrix& J_s, const int i );
             yarp::sig::Matrix Adjoint( const yarp::sig::Matrix& T_ab);
             yarp::sig::Matrix ad_lie( const yarp::sig::Vector& Xi);
+	    yarp::sig::Matrix getRot(const yarp::sig::Matrix& T_ab) ;
                      //----------------------------------------------------------------------------
      /**
      * @brief  Q_ci compute the derivative of the spatial Jacobian 
@@ -48,6 +49,105 @@ namespace locoman {
                                         }   
                                     return Q_c_i ;
                             }
+                            
+                            
+         
+    //RobotUtils& robot 
+                            
+   /**
+     * @brief  Q_mg compute the derivative of the gravitational term
+     * @param  q_actual current robot configuration configuration 
+     * @param  mg_vector contact force vector (3 force elements)
+     * @param  T_aw_w_0 is the homogeneous transformation between {AW} and {W} (Auxiliary wolrd and wolrd)
+     * @param  robot is the robot model
+     * @return (q+6)x(q+6) yarp matrix 
+     **/
+    yarp::sig::Matrix Q_mg( const yarp::sig::Vector& q_actual , 
+                            const yarp::sig::Vector& mg_vector,
+			    const yarp::sig::Matrix& T_aw_w_0 , 
+			    RobotUtils& robot) {
+				  robot.idynutils.updateiDyn3Model( q_actual, true );
+                                  yarp::sig::Matrix Q_mg_matrix( q_actual.length()+6 , q_actual.length()+6 );
+				  Q_mg_matrix.zero();
+				  yarp::sig::Vector q_h = q_actual ;
+                                  double h_incremental = std::pow(std::numeric_limits<double>::epsilon(), 1.0/2.0);  
+				  yarp::sig::Matrix J_com_w(6, q_actual.length() + 6 ) ;
+				  yarp::sig::Matrix J_com_w_redu(6, q_actual.length()+6);
+				  yarp::sig::Matrix J_com_aw(6, q_actual.length()+6);
+				  yarp::sig::Matrix J_com_w_q_i(6, q_actual.length() + 6 ) ;
+				  yarp::sig::Matrix J_com_w_redu_q_i(6, q_actual.length()+6);
+				  yarp::sig::Matrix J_com_aw_q_i(6, q_actual.length()+6);				  
+				  
+				  yarp::sig::Vector tau_mg_0( q_actual.length()+6, 0.0) ; //= J_com_aw.transposed()*mg_vector ;
+				  yarp::sig::Vector tau_mg_q_i(q_actual.length()+6, 0.0 ) ;// = tau_mg_0 ;
+				  yarp::sig::Vector tau_mg_differential_i( q_actual.length()+6, 0.0 )  ;
+				  
+				  yarp::sig::Matrix Rot_aw_w_0 = locoman::utils::getRot(T_aw_w_0)  ;
+  
+				  // Calcolare i jacobiani nella configurazione attuale
+				  robot.idynutils.iDyn3_model.getCOMJacobian(J_com_w) ;
+				  J_com_w_redu = J_com_w.submatrix(0,2 , 0 , J_com_w.cols()-1 ) ;  
+				  J_com_aw     = Rot_aw_w_0 *J_com_w_redu;   
+				  tau_mg_0 = J_com_aw.transposed()*mg_vector ;
+  
+                                  for ( int i = 0  ; i<q_actual.length()  ; i++ )  // i<(J_waist_l_c1_spa_0.cols()-1)
+                                        {
+					    tau_mg_q_i.zero();
+					    q_h = q_actual ;
+					    q_h[i] += h_incremental ;
+					    robot.idynutils.updateiDyn3Model( q_h, true );
+					    robot.idynutils.iDyn3_model.getCOMJacobian(J_com_w_q_i) ;
+					    J_com_w_redu_q_i = J_com_w_q_i.submatrix(0,2 , 0 , J_com_w_q_i.cols()-1 ) ;  
+					    J_com_aw_q_i = Rot_aw_w_0 *J_com_w_redu_q_i ; 
+					    tau_mg_q_i = J_com_aw_q_i.transposed() * mg_vector ;
+					    tau_mg_differential_i = (tau_mg_q_i - tau_mg_0)/h_incremental ;
+					    Q_mg_matrix.setCol( i, tau_mg_differential_i ) ;
+   
+//                                         Q_ci_col_i =  ( locoman::utils::D_Jacob_spa_i(J_spa_i, (i+1)) ).transposed()*
+//                                                         ( locoman::utils::Adjoint(
+//                                                             locoman::utils::iHomogeneous(T_a_ci))).transposed()*B *f_ci  +
+//                                                         J_spa_i.transposed()* 
+//                                                         ( locoman::utils::Adjoint( locoman::utils::iHomogeneous(T_a_ci) )*
+//                                                         locoman::utils::ad_lie( -1.0*J_spa_i.getCol(i))).transposed()*  B *f_ci;
+//                                         Q_c_i.setCol(i, Q_ci_col_i ) ;       
+                                        }   
+                                    return Q_mg_matrix ;
+                            }                           
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
      /**
      * @brief  Q_ci_wrench compute the derivative of the spatial Jacobian 
      * @param  J_spa_i is a 6xc yarp matrix describing a spatial Jacobian
