@@ -981,7 +981,7 @@ namespace locoman {
                 double steps_aux = steps ; // This is helpful to avoid casting to int the subsequent division 
                 yarp::sig::Vector d_q_des = (q_des - q_motor_current); //
                 for(int i = 1; i <steps_aux+1; i++){
-                    robot.move( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
+                    robot.moveNoHead( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
                     usleep(30*1000) ;
                 }
         return 0 ;
