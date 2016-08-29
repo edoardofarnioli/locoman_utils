@@ -55,7 +55,8 @@ namespace locoman {
             yarp::sig::Matrix Adjoint_MT( const yarp::sig::Matrix& T_ab);
                  
 	    yarp::sig::Vector sense_position_no_hands(RobotUtils& robot) {
-                yarp::sig::Vector wb_input_q = robot.sensePositionRefFeedback();
+                //yarp::sig::Vector wb_input_q = robot.sensePositionRefFeedback();
+                yarp::sig::Vector wb_input_q = robot.sensePosition() ;
                 yarp::sig::Vector input_q_no_hands(getNumberOfKinematicJoints(robot));
 
                 for(int i=0;i<input_q_no_hands.size();i++) {
@@ -980,7 +981,7 @@ namespace locoman {
                 
                 double steps_aux = steps ; // This is helpful to avoid casting to int the subsequent division 
                 yarp::sig::Vector d_q_des = (q_des - q_motor_current); //
-                for(int i = 1; i <steps_aux+1; i++){
+                for(int i =0; i <steps_aux+1; i++){
                     robot.moveNoHead( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
                     usleep(30*1000) ;
                 }
@@ -988,7 +989,7 @@ namespace locoman {
     }
     
     /**
-     * @brief Tic fucntion for tic-toc matlab style
+     * @brief Tic function for tic-toc matlab style
      * @return the tic time
      */
     double Tic( ) {
