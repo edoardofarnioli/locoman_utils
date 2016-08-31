@@ -30,7 +30,7 @@ INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${idynutils_INCLUDE_DIRS} ${EIG
 # for every file in INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE ${PROJECT_NAME}_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/locoman/utils" *.h*)
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED  src/locoman_utils.cpp
+ADD_LIBRARY(${PROJECT_NAME} SHARED  src/declarations.cpp
                         	    ${${PROJECT_NAME}_INCLUDES})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}   ${YARP_LIBRARIES})
