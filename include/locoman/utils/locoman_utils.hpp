@@ -905,6 +905,26 @@ namespace locoman {
                             return 0 ; // FC_DES ;
     }  
      
+    /**
+    * @brief  provide the desired contact force distribution => 0% on the left/right
+    * @param  front_part fraction of the weight desired on the front part of the feet, it has to be <1.0
+    * @return  0 if ok
+    */
+    int FC_DES_front( yarp::sig::Vector& FC_DES, double mg , double front_part) {
+			  double rear_part = (1.0-front_part) ; 
+			  // On the left foot
+			  FC_DES[2] =  - ( front_part *(mg/8.0) )   ;
+			  FC_DES[5] =  - ( front_part *(mg/8.0) )   ;
+			  FC_DES[8] =  - ( rear_part  *(mg/8.0) )   ;
+			  FC_DES[11] = - ( rear_part  *(mg/8.0) )   ;
+			  // On the right foot
+			  FC_DES[14] = - ( front_part *(mg/8.0) )   ;
+			  FC_DES[17] = - ( front_part *(mg/8.0) )   ;
+			  FC_DES[20] = - ( rear_part  *(mg/8.0) )   ;
+			  FC_DES[23] = - ( rear_part  *(mg/8.0) )   ; 
+			  //     
+			  return 0 ; // FC_DES ;
+    }   
      
      /**
      * @brief  easy way for rotating the right shoulder 
