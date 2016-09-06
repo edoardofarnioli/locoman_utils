@@ -200,23 +200,25 @@ namespace locoman {
                             const yarp::sig::Matrix& J_r1_foot_body ,
                             const yarp::sig::Matrix& J_waist_CoM 
                                         ) {
-                                        yarp::sig::Matrix Eye_3(3,3); Eye_3.eye() ;
+                                        yarp::sig::Matrix Eye_3(3,3);
+					Eye_3.eye() ;
+
                                         // filtering the error
                                         double  max_trasl_err  = 0.001  ;  // maximum displacement allowed in a loop
                                         double  max_orient_err = 0.01   ;  // maximum rotation allowed in a loop
                                         double  min_trasl_err  = 0.00002 ;  // minimum displacement, otherwise is approximated to zero
                                         double  min_orient_err = 0.001  ;  // minimum rotation, otherwise is approximated to zero
-                                        
+            
                                         yarp::sig::Vector trasl_l_hand_err   = locoman::utils::getTrasl(T_l_hand_des) ;
-                                        yarp::sig::Vector orient_l_hand_err  = Orient_Error( locoman::utils::getRot(T_l_hand_des ) , Eye_3 )  ;
+                                        yarp::sig::Vector orient_l_hand_err  = locoman::utils::Orient_Error( locoman::utils::getRot(T_l_hand_des ) , Eye_3 )  ;
                                         yarp::sig::Vector trasl_r_hand_err   = locoman::utils::getTrasl(T_r_hand_des) ;
-                                        yarp::sig::Vector orient_r_hand_err  = Orient_Error( locoman::utils::getRot(T_r_hand_des ) , Eye_3 )  ;
+                                        yarp::sig::Vector orient_r_hand_err  = locoman::utils::Orient_Error( locoman::utils::getRot(T_r_hand_des ) , Eye_3 )  ;
                                         yarp::sig::Vector trasl_l1_foot_err  = locoman::utils::getTrasl(T_l1_foot_des);
-                                        yarp::sig::Vector orient_l1_foot_err = Orient_Error( locoman::utils::getRot(T_l1_foot_des), Eye_3 )   ;
+                                        yarp::sig::Vector orient_l1_foot_err = locoman::utils::Orient_Error( locoman::utils::getRot(T_l1_foot_des), Eye_3 )   ;
                                         yarp::sig::Vector trasl_r1_foot_err  = locoman::utils::getTrasl(T_r1_foot_des);
-                                        yarp::sig::Vector orient_r1_foot_err = Orient_Error( locoman::utils::getRot(T_r1_foot_des ) , Eye_3 ) ;
+                                        yarp::sig::Vector orient_r1_foot_err = locoman::utils::Orient_Error( locoman::utils::getRot(T_r1_foot_des ) , Eye_3 ) ;
                                         yarp::sig::Vector CoM_err = CoM_waist_cmd  ;
-
+				
                                         if(yarp::math::norm(trasl_l_hand_err)  > max_trasl_err ) {trasl_l_hand_err   = max_trasl_err  * trasl_l_hand_err/(yarp::math::norm(trasl_l_hand_err)    ) ;}  
                                         if(yarp::math::norm(orient_l_hand_err) > max_orient_err) {orient_l_hand_err  = max_orient_err * orient_l_hand_err/(yarp::math::norm(orient_l_hand_err)  ) ;}  
                                         if(yarp::math::norm(trasl_r_hand_err)  > max_trasl_err ) {trasl_r_hand_err   = max_trasl_err  * trasl_r_hand_err/(yarp::math::norm(trasl_r_hand_err)    ) ;}
@@ -226,7 +228,7 @@ namespace locoman {
                                         if(yarp::math::norm(trasl_r1_foot_err) > max_trasl_err ) {trasl_r1_foot_err  = max_trasl_err  * trasl_r1_foot_err/(yarp::math::norm(trasl_r1_foot_err)  ) ;}
                                         if(yarp::math::norm(orient_r1_foot_err)> max_orient_err) {orient_r1_foot_err = 0.0*orient_r1_foot_err ;}
                                         if(yarp::math::norm(CoM_err) > max_trasl_err) {CoM_err = max_trasl_err*CoM_err ;}
-                                        
+                
                                         if(yarp::math::norm(trasl_l_hand_err)<min_trasl_err) {trasl_l_hand_err = 0.0*trasl_l_hand_err ;}
                                         if(yarp::math::norm(orient_l_hand_err)<min_orient_err) {orient_l_hand_err = 0.0*orient_l_hand_err ;}  
                                         if(yarp::math::norm(trasl_r_hand_err)<min_trasl_err) {trasl_r_hand_err = 0.0*trasl_r_hand_err ;}
@@ -236,7 +238,7 @@ namespace locoman {
                                         if(yarp::math::norm(trasl_r1_foot_err)<min_trasl_err) {trasl_r1_foot_err = 0.0*trasl_r1_foot_err ;}
                                         if(yarp::math::norm(orient_r1_foot_err)<min_orient_err) {orient_r1_foot_err = 0.0*orient_r1_foot_err ;}
                                         if(yarp::math::norm(CoM_err)<min_trasl_err) {CoM_err = 0.0*CoM_err ;}
-                                        
+                 
                                         // Error Vector
                                         yarp::sig::Vector d_C(27, 0.0) ;
                                         d_C.setSubvector(0 , trasl_l_hand_err    ) ;
@@ -249,7 +251,7 @@ namespace locoman {
                                         d_C.setSubvector(21, orient_r1_foot_err  ) ;
                                         d_C.setSubvector(24, CoM_err             ) ;
                                         
-                                        //   std::cout << " d_C = " <<  std::endl << d_C.toString() << std::endl; 
+					//std::cout << " d_C = " <<  std::endl << d_C.toString() << std::endl ; 
 
                                         // Whole Jacobian 
                                         yarp::sig::Matrix Whole_Jac(d_C.length(), J_l_hand_body.cols() ) ; 
@@ -259,13 +261,13 @@ namespace locoman {
                                         Whole_Jac.setSubmatrix( J_l1_foot_body, 12 , 0 ) ;
                                         Whole_Jac.setSubmatrix( J_r1_foot_body, 18 , 0 ) ;
                                         Whole_Jac.setSubmatrix( J_waist_CoM   , 24 , 0 ) ;
-                                        
+              
                                         //pseudoinverse
                                         yarp::sig::Vector d_q_long = locoman::utils::Pinv_trunc_SVD( Whole_Jac , 1E-10 ) * d_C ;
 
                                         //selections
                                         yarp::sig::Vector d_q_move = d_q_long.subVector(6, d_q_long.length()-1) ;
-                                        
+        
                                         return d_q_move ; 
                                         } 
 

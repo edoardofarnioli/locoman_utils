@@ -933,18 +933,20 @@ namespace locoman {
      */
      yarp::sig::Vector moving_right_arm( const double alpha,
                                          RobotUtils& robot,
-                                         bool flag_robot
+                                         bool flag_robot, 
+					 yarp::sig::Vector q_current
     ) {
-                                            yarp::sig::Vector q_ref_ToMove(RIGHT_ARM_JOINT_NUM) ; 
-                                            yarp::sig::Vector q_ref_ToMove_right_arm(RIGHT_ARM_JOINT_NUM) ;
+                                            yarp::sig::Vector q_ref_ToMove = q_current ; 
+
+					    yarp::sig::Vector q_ref_ToMove_right_arm(RIGHT_ARM_JOINT_NUM) ;
                                             yarp::sig::Vector q_ref_ToMove_left_arm(LEFT_ARM_JOINT_NUM) ;
                                             yarp::sig::Vector q_ref_ToMove_torso(TORSO_JOINT_NUM) ;
                                             yarp::sig::Vector q_ref_ToMove_right_leg(RIGHT_LEG_JOINT_NUM) ;
                                             yarp::sig::Vector q_ref_ToMove_left_leg(LEFT_LEG_JOINT_NUM) ;
                                         
-                                            q_ref_ToMove =  locoman::utils::senseMotorPosition(robot, flag_robot)  ;
+                                            //q_ref_ToMove = q_current ; //locoman::utils::senseMotorPosition(robot, flag_robot)  ;
 
-                                            robot.fromRobotToIdyn(  q_ref_ToMove,
+                                            robot.fromIdynToRobot(  q_ref_ToMove,
                                                                     q_ref_ToMove_right_arm,
                                                                     q_ref_ToMove_left_arm,
                                                                     q_ref_ToMove_torso,
@@ -952,13 +954,14 @@ namespace locoman {
                                                                     q_ref_ToMove_left_leg  ) ; 
 
                                             q_ref_ToMove_right_arm[0] += alpha ;  
-                                            
+                       
                                             robot.fromRobotToIdyn( q_ref_ToMove_right_arm ,
                                                                 q_ref_ToMove_left_arm  ,
                                                                 q_ref_ToMove_torso     ,
                                                                 q_ref_ToMove_right_leg ,
                                                                 q_ref_ToMove_left_leg  ,
-                                                                q_ref_ToMove           );    
+                                                                q_ref_ToMove           );   
+
                                             return q_ref_ToMove ; 
                                               }  
 
@@ -994,7 +997,7 @@ namespace locoman {
                           const bool flag_robot,
                           const yarp::sig::Vector& q_motor_current,
                           const yarp::sig::Vector& q_des,
-                          const int steps = 300.0 ) {           
+                          const int steps = 300.0 , const bool verbose = 0) {           
 /*              yarp::sig::Vector q_motor_current = locoman::utils::senseMotorPosition(robot, flag_robot) ; // this function uses manually imposed joint stiffness values             
                 yarp::sig::Vector q_des(robot.getNumberOfJoints() ) ;     */               
                 //if(1-flag_robot){steps = 100.0 ; } //faster on the simulator
@@ -1003,6 +1006,7 @@ namespace locoman {
                 yarp::sig::Vector d_q_des = (q_des - q_motor_current); //
                 for(int i =0; i <steps_aux+1; i++){
                     robot.moveNoHead( q_motor_current+(i/steps_aux)*  d_q_des) ; // robot.move(q_des) ;
+                    if(verbose){std::cout << "step = " << i  << "/" << steps_aux <<std::endl ; }
                     usleep(30*1000) ;
                 }
         return 0 ;
