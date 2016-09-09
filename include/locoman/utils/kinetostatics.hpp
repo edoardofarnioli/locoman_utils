@@ -20,6 +20,18 @@ namespace locoman {
             yarp::sig::Matrix Adjoint( const yarp::sig::Matrix& T_ab);
             yarp::sig::Matrix ad_lie( const yarp::sig::Vector& Xi);
 	    yarp::sig::Matrix getRot(const yarp::sig::Matrix& T_ab) ;
+	    yarp::sig::Vector WB_Cartesian_Tasks( 
+                            const yarp::sig::Matrix& T_l_hand_des,
+                            const yarp::sig::Matrix& T_r_hand_des,
+                            const yarp::sig::Matrix& T_l1_foot_des ,
+                            const yarp::sig::Matrix& T_r1_foot_des ,
+                            const yarp::sig::Vector& CoM_waist_cmd ,
+                            const yarp::sig::Matrix& J_l_hand_body ,
+                            const yarp::sig::Matrix& J_r_hand_body ,
+                            const yarp::sig::Matrix& J_l1_foot_body ,
+                            const yarp::sig::Matrix& J_r1_foot_body ,
+                            const yarp::sig::Matrix& J_waist_CoM 
+                                        ) ;
                      //----------------------------------------------------------------------------
      /**
      * @brief  Q_ci compute the derivative of the spatial Jacobian 
@@ -360,7 +372,187 @@ namespace locoman {
                                     yarp::sig::Matrix U_s_1 = -1.0*U_s-1.0*S_c*K_c*S_c.transposed() ;    
                                     yarp::sig::Matrix L = yarp::math::luinv(U_s_1)* Q_s_1 ;
                                     return L ;
-                            }                                             
+                            } 
+                            
+ yarp::sig::Vector rg_hand_dw_touch_simple( RobotUtils& robot ,
+		                  yarp::sig::Vector& q_current, 
+				  const yarp::sig::Matrix& Big_J, 
+				  const int r_ankle_index,
+				  const int r_hand_index,
+				  double f_limit = 5.0,
+				  double step_limit = 0.1
+                              ) {
+      		      // simple it means that we are on flat terrain
+                     // absolute z-axis = z axis of the feet
+			  yarp::sig::Vector d_q_move = 0.0*q_current ;
+			  yarp::sig::Vector ft_r_wrist(6,0.0) ;
+			  robot.senseftSensor("r_arm_ft", ft_r_wrist) ;  
+			  f_limit = -1.0*abs(f_limit);
+			  
+			  if(ft_r_wrist[2]>f_limit){ 
+			  yarp::sig::Matrix T_w_r_ankle_0 = robot.idynutils.iDyn3_model.getPosition(r_ankle_index) ;
+			  yarp::sig::Matrix T_w_r_hand_0  = robot.idynutils.iDyn3_model.getPosition(r_hand_index ) ;   
+
+			  yarp::sig::Matrix T_rfoot_rhand = locoman::utils::iHomogeneous(T_w_r_hand_0)*T_w_r_ankle_0;
+			  yarp::sig::Matrix T_rfoot_target =T_rfoot_rhand ;
+			  T_rfoot_target[2][3] -=0.1 ;
+			  yarp::sig::Matrix T_rhand_target = locoman::utils::iHomogeneous(T_rfoot_rhand)*T_rfoot_target ;
+ 
+			  yarp::sig::Matrix Eye_4(4,4) ;
+			  Eye_4.eye();
+			  yarp::sig::Vector zero_3(3,0.0) ;
+
+// 			  yarp::sig::Matrix T_rg_dw(4,4) ;
+// 			  T_rg_dw.eye() ;
+// 			  T_rg_dw[2][3] = -0.1 ;
+	      
+			  d_q_move = locoman::utils::WB_Cartesian_Tasks( 
+									  Eye_4,             // T_l_hand_des,
+									  T_rhand_target,             // T_r_hand_des,
+									  Eye_4,             // T_l1_foot_des ,
+									  Eye_4,             // T_r1_foot_des ,
+									  zero_3,            //CoM_err ,
+									  Big_J.submatrix(0,5,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(6,11,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(12,17,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(18,23,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(24,Big_J.rows()-1,0,Big_J.cols()-1) 
+										      ) ;
+			   if(norm(d_q_move) > step_limit) { d_q_move =  step_limit*d_q_move/ norm(d_q_move) ; } 
+			
+		      }
+		      else  {d_q_move = 0.0*q_current ; }
+		      
+		      return d_q_move ;
+				  
+                            }     
+  
+  
+  yarp::sig::Vector lf_hand_dw_touch_simple( RobotUtils& robot ,
+		                  yarp::sig::Vector& q_current, 
+				  const yarp::sig::Matrix& Big_J, 
+				  const int l_ankle_index,
+				  const int l_hand_index,
+				  double f_limit = 5.0,
+				  double step_limit = 0.1
+                              ) {
+      		      // simple it means that we are on flat terrain
+                     // absolute z-axis = z axis of the feet
+			  yarp::sig::Vector d_q_move = 0.0*q_current ;
+			  yarp::sig::Vector ft_l_wrist(6,0.0) ;
+			  robot.senseftSensor("l_arm_ft", ft_l_wrist) ;  
+			  f_limit = -1.0*abs(f_limit);
+			  
+			  if(ft_l_wrist[2]>f_limit){ 
+			  yarp::sig::Matrix T_w_l_ankle_0 = robot.idynutils.iDyn3_model.getPosition(l_ankle_index) ;
+			  yarp::sig::Matrix T_w_l_hand_0  = robot.idynutils.iDyn3_model.getPosition(l_hand_index ) ;   
+
+			  yarp::sig::Matrix T_lfoot_rhand = locoman::utils::iHomogeneous(T_w_l_hand_0)*T_w_l_ankle_0;
+			  yarp::sig::Matrix T_lfoot_target =T_lfoot_rhand ;
+			  T_lfoot_target[2][3] -=0.1 ;
+			  yarp::sig::Matrix T_lhand_target = locoman::utils::iHomogeneous(T_lfoot_rhand)*T_lfoot_target ;
+ 
+			  yarp::sig::Matrix Eye_4(4,4) ;
+			  Eye_4.eye();
+			  yarp::sig::Vector zero_3(3,0.0) ;
+
+	      
+			  d_q_move = locoman::utils::WB_Cartesian_Tasks( 
+									  T_lhand_target,             // T_l_hand_des,
+									  Eye_4,             // T_r_hand_des,
+									  Eye_4,             // T_l1_foot_des ,
+									  Eye_4,             // T_r1_foot_des ,
+									  zero_3,            //CoM_err ,
+									  Big_J.submatrix(0,5,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(6,11,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(12,17,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(18,23,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(24,Big_J.rows()-1,0,Big_J.cols()-1) 
+										      ) ;
+			   if(norm(d_q_move) > step_limit) { d_q_move =  step_limit*d_q_move/ norm(d_q_move) ; } 
+			
+		      }
+		      else  {d_q_move = 0.0*q_current ; }
+		      
+		      return d_q_move ;
+				  
+                            }  
+     
+     yarp::sig::Vector hands_dw_touch_simple( RobotUtils& robot ,
+					    yarp::sig::Vector& q_current, 
+					    const yarp::sig::Matrix& Big_J, 
+					    const int l_ankle_index,
+					    const int r_ankle_index,
+					    const int l_hand_index,
+					    const int r_hand_index,
+					    double f_limit = 5.0,
+					    double step_limit = 0.1
+                              ) {
+      		      // simple it means that we are on flat terrain
+                     // absolute z-axis = z axis of the feet
+			  yarp::sig::Vector d_q_move = 0.0*q_current ;
+			  
+			  f_limit = -1.0*abs(f_limit);
+			  
+			  yarp::sig::Vector ft_l_wrist(6,0.0) ;
+ 			  yarp::sig::Vector ft_r_wrist(6,0.0) ;
+			  robot.senseftSensor("l_arm_ft", ft_l_wrist) ;  
+			  robot.senseftSensor("r_arm_ft", ft_r_wrist) ;  
+			  
+			  yarp::sig::Matrix T_lhand_target(4,4) ;
+			  T_lhand_target.eye() ;
+// 			  
+			  if(ft_l_wrist[2]>f_limit){ 
+			  yarp::sig::Matrix T_w_l_ankle_0 = robot.idynutils.iDyn3_model.getPosition(l_ankle_index) ;
+			  yarp::sig::Matrix T_w_l_hand_0  = robot.idynutils.iDyn3_model.getPosition(l_hand_index ) ;   
+
+			  yarp::sig::Matrix T_lfoot_rhand = locoman::utils::iHomogeneous(T_w_l_hand_0)*T_w_l_ankle_0;
+			  yarp::sig::Matrix T_lfoot_target =T_lfoot_rhand ;
+			  T_lfoot_target[2][3] -=0.1 ;
+			  T_lhand_target = locoman::utils::iHomogeneous(T_lfoot_rhand)*T_lfoot_target ;
+			  }
+			  
+			  yarp::sig::Matrix T_rhand_target(4,4) ;
+			  T_rhand_target.eye() ;
+			  if(ft_r_wrist[2]>f_limit){ 
+			  yarp::sig::Matrix T_w_r_ankle_0 = robot.idynutils.iDyn3_model.getPosition(r_ankle_index) ;
+			  yarp::sig::Matrix T_w_r_hand_0  = robot.idynutils.iDyn3_model.getPosition(r_hand_index ) ;   
+
+			  yarp::sig::Matrix T_rfoot_rhand = locoman::utils::iHomogeneous(T_w_r_hand_0)*T_w_r_ankle_0;
+			  yarp::sig::Matrix T_rfoot_target =T_rfoot_rhand ;
+			  T_rfoot_target[2][3] -=0.1 ;
+			  T_rhand_target = locoman::utils::iHomogeneous(T_rfoot_rhand)*T_rfoot_target ;
+			  }
+			  
+			  yarp::sig::Matrix Eye_4(4,4) ;
+			  Eye_4.eye();
+			  yarp::sig::Vector zero_3(3,0.0) ;
+ 		      if( !(ft_l_wrist[2]<f_limit&& ft_r_wrist[2]<f_limit)){ 
+			  d_q_move = locoman::utils::WB_Cartesian_Tasks( 
+									  T_lhand_target,             // T_l_hand_des,
+									  T_rhand_target,             // T_r_hand_des,
+									  Eye_4,             // T_l1_foot_des ,
+									  Eye_4,             // T_r1_foot_des ,
+									  zero_3,            //CoM_err ,
+									  Big_J.submatrix(0,5,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(6,11,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(12,17,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(18,23,0,Big_J.cols()-1) ,
+									  Big_J.submatrix(24,Big_J.rows()-1,0,Big_J.cols()-1) 
+										      ) ;
+			   if(norm(d_q_move) > step_limit) { d_q_move =  step_limit*d_q_move/ norm(d_q_move) ; } 
+			}
+
+ 		      else 
+			  {d_q_move = 0.0*q_current ; }
+		      
+		      return d_q_move ;
+				  
+                            }  
+     
+     
+           
+                                       
                               
                               
         }
