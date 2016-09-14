@@ -136,6 +136,9 @@ namespace locoman {
                                 const yarp::sig::Matrix& J_r1_foot_body ,
                                 const yarp::sig::Matrix& J_waist_CoM 
                                             );
+	
+	const unsigned int& getNumberOfKinematicJoints(const RobotUtils& robot);
+	yarp::sig::Vector sense_position_no_hands(RobotUtils& robot);
     }
 }
 #endif //_LOCO_DECLARATIONS_H_
