@@ -80,7 +80,7 @@ namespace locoman {
                                     const int c2_index,
                                     const int c3_index,
                                     const int c4_index,
-                                    iDynUtils model 
+                                    iDynUtils& model 
                                     // bool flag_robot
                                     ) ;
         yarp::sig::Matrix AW_world_posture( iDynUtils model , 
