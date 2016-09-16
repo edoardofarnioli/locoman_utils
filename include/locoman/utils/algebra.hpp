@@ -40,7 +40,7 @@ return Round_M ;
     }
     
     
-    //------------------------------------------------------------------------------------
+     //------------------------------------------------------------------------------------
      /**
      * @brief  Pinv_trunc_SVD computes the pseudoinverse of A via the truncated SVD method 
      * @param  A is the matrix to pseudo-inverse
@@ -50,55 +50,57 @@ return Round_M ;
       yarp::sig::Matrix Pinv_trunc_SVD( const yarp::sig::Matrix& A ,
                                         const double k = 1E-4 
                                       ) {
-  int r_A = A.rows() ;
-  int c_A = A.cols() ;
-  int c_U = c_A;
-  if(c_U>r_A ) c_U = r_A ;
-  yarp::sig::Matrix U( r_A, c_U )  ;
-  yarp::sig::Matrix V( c_A, c_U )  ;
-  yarp::sig::Vector S( c_U ) ;  
-  yarp::sig::Matrix S_1( c_U , c_U ) ;  
-  S_1.zero();
-  
-  yarp::math::SVD(A, U, S, V );
-  
-  double k_norm = S(0)*k ;
-        for(int i = 0 ;  i < c_U ; i++)
-    {
-      if( S(i)<k_norm) 
-      {
-        S_1(i,i)=0.0; 
-      }
-      else
-      {
-        S_1(i,i) = 1/S(i) ;
-      }
-    }  
-    yarp::sig::Matrix pinv_A = V * S_1 *U.transposed() ;
-  return pinv_A ;
+					int r_A = A.rows() ;
+					int c_A = A.cols() ;
+					int c_U = c_A;
+					if(c_U>r_A ) c_U = r_A ;
+					yarp::sig::Matrix U( r_A, c_U )  ;
+					yarp::sig::Matrix V( c_A, c_U )  ;
+					yarp::sig::Vector S( c_U ) ;  
+					yarp::sig::Matrix S_1( c_U , c_U ) ;  
+					S_1.zero();
+					
+					yarp::math::SVD(A, U, S, V );
+					
+					double k_norm = S(0)*k ;
+					      for(int i = 0 ;  i < c_U ; i++)
+					  {
+					    if( S(i)<k_norm) 
+					    {
+					      S_1(i,i)=0.0; 
+					    }
+					    else
+					    {
+					      S_1(i,i) = 1/S(i) ;
+					    }
+					  }  
+					  yarp::sig::Matrix pinv_A = V * S_1 *U.transposed() ;
+					return pinv_A ;
                                     }   // 
 //------------------------------------------------------------------------------------
      /**
      * @brief  Pinv_Regularized computes the Levemberg Regularized pseudo-inverse of A 
      * @param  A is the matrix to pseudo-inverse
      * @param  k is the regularization factor
+     * @param  filter filters the singular values before computing the inverse of At*A (or A*At, depending by the size of A)
      * @return Pinv_Regularized is the pseudo-inverse of A
      */ 
       yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix& A ,
-                                          const double k  
+                                          const double k,
+					  const double filter = 1E-7
                                         ) {
                                             int r_A = A.rows() ;
                                             int c_A = A.cols() ;
                                             if(c_A< r_A ){    // tall matrix => Defective manipulator
                                             yarp::sig::Matrix At_A = A.transposed()*A ;
                                             yarp::sig::Matrix Eye_temp_l = yarp::math::eye(At_A.rows(), At_A.cols() ) ;
-                                            yarp::sig::Matrix pinv_A_l = locoman::utils::Pinv_trunc_SVD(At_A + k*Eye_temp_l , 1E-7 ) * A.transposed() ;
+                                            yarp::sig::Matrix pinv_A_l = locoman::utils::Pinv_trunc_SVD(At_A + k*Eye_temp_l , filter ) * A.transposed() ;
                                             return pinv_A_l ;
                                             }
                                             else {    // fat (or square) matrix => Redundant (or square) manipulator
                                             yarp::sig::Matrix A_At = A*A.transposed() ;
                                             yarp::sig::Matrix Eye_temp_r = yarp::math::eye( A_At.rows(), A_At.cols() ) ;
-                                            yarp::sig::Matrix pinv_A_r = A.transposed()* locoman::utils::Pinv_trunc_SVD(A_At + k*Eye_temp_r , 1E-7 )  ;
+                                            yarp::sig::Matrix pinv_A_r = A.transposed()* locoman::utils::Pinv_trunc_SVD(A_At + k*Eye_temp_r , filter )  ;
                                             return pinv_A_r ;
                                             }
                                         }     
@@ -275,6 +277,170 @@ return Round_M ;
                                             yarp::sig::Matrix A_filter = U * S_1 * V.transposed() ;
                                             return A_filter ;                                
                                     }
+     
+     /**
+     * @brief  filter_k_th_SVD computes a "filtered" version of A admitting no more than k singular values
+     * @param  A is the matrix of which the filtered version is needed
+     * @param  k is the maximum number of singular values admitted 
+     * @return filter_k_th_SVD is the filtered version of A
+     */
+      yarp::sig::Matrix filter_k_th_SVD( const yarp::sig::Matrix& A ,
+                                         const double k 
+                                      ) {
+                                            int r_A = A.rows() ;
+                                            int c_A = A.cols() ;
+                                            int c_U = c_A;
+                                            if(c_U>r_A ) c_U = r_A ;    
+                                            yarp::sig::Matrix U( r_A, c_U )  ;
+                                            yarp::sig::Matrix V( c_A, c_U )  ;
+                                            yarp::sig::Vector S( c_U ) ;  
+                                            yarp::sig::Matrix S_1( c_U , c_U ) ;  
+                                            S_1.zero();
+                                            yarp::math::SVD(A, U, S, V );
+					    for(int i = 0 ;  i < S.length() ; i++)
+                                                {
+						  if( i < k ) 
+						  {
+						      S_1(i,i) = S(i) ; //S_1(i,i)=0.0; 
+						  }
+						  else
+						  {
+						      S_1(i,i) = 0.0 ;
+						  }
+                                                } 
+                                            yarp::sig::Matrix A_filter = U * S_1 * V.transposed() ;
+                                            return A_filter ;                                
+                                    }      
+                                                      
+     /**
+     * @brief  filter_k_eps_SVD computes a "filtered" version of A admitting no more than k singular values
+     * @param  A is the matrix of which the filtered version is needed
+     * @param  k is the maximum number of singular values admitted 
+     * @param  eps is the maximum ratio admitted between the max and min singular values
+     * @return filter_k_eps_SVD is the filtered version of A
+     */
+      yarp::sig::Matrix filter_k_eps_SVD( const yarp::sig::Matrix& A ,
+                                          const double k,
+					  const double eps = 1E-4 
+                                      ) {
+                                            int r_A = A.rows() ;
+                                            int c_A = A.cols() ;
+                                            int c_U = c_A;
+                                            if(c_U>r_A ) c_U = r_A ;    
+                                            yarp::sig::Matrix U( r_A, c_U )  ;
+                                            yarp::sig::Matrix V( c_A, c_U )  ;
+                                            yarp::sig::Vector S( c_U ) ;  
+                                            yarp::sig::Matrix S_1( c_U , c_U ) ;  
+                                            S_1.zero();
+					    double eps_norm = S(0)*eps ;
+                                            yarp::math::SVD(A, U, S, V );
+					    for(int i = 0 ;  i < S.length() ; i++)
+                                                {
+						  if( (i < k) && !(S(i)<eps_norm) ) 
+						  {
+						      S_1(i,i) = S(i) ; //S_1(i,i)=0.0; 
+						  }
+						  else
+						  {
+						      S_1(i,i) = 0.0 ;
+						  }
+                                                } 
+                                            yarp::sig::Matrix A_filter = U * S_1 * V.transposed() ;
+                                            return A_filter ;                                
+                                    }                                    
+  
+   //------------------------------------------------------------------------------------
+     /**
+     * @brief  Pinv_k_SVD computes the pseudoinverse of A via the truncated SVD method,
+     * @brief  considering the maximum number of singular values admitted 
+     * @param  A is the matrix to pseudo-inverse
+     * @param  k is the maximum number of singular values admitted 
+     * @return Pinv_k_SVD is the pseudo-inverse of A
+     */
+      yarp::sig::Matrix Pinv_k_SVD( const yarp::sig::Matrix& A ,
+                                    const double k
+                                      ) {
+					    int r_A = A.rows() ;
+                                            int c_A = A.cols() ;
+                                            int c_U = c_A;
+                                            if(c_U>r_A ) c_U = r_A ;    
+                                            yarp::sig::Matrix U( r_A, c_U )  ;
+                                            yarp::sig::Matrix V( c_A, c_U )  ;
+                                            yarp::sig::Vector S( c_U ) ;  
+                                            yarp::sig::Matrix S_1( c_U , c_U ) ;  
+                                            S_1.zero();
+                                            yarp::math::SVD(A, U, S, V );
+					    for(int i = 0 ;  i < S.length() ; i++)
+                                                {
+						  if( i < k ) 
+						  {
+						      S_1(i,i) = S(i) ; //S_1(i,i)=0.0; 
+						  }
+						  else
+						  {
+						      S_1(i,i) = 0.0 ;
+						  }
+                                                }   
+					  yarp::sig::Matrix pinv_A = V * S_1 *U.transposed() ;
+					  return pinv_A ;
+                                    }
+  
+     //------------------------------------------------------------------------------------
+     /**
+     * @brief  Pinv_k_eps_SVD computes the pseudoinverse of A via the truncated SVD method, 
+     * @brief  considering both the maximum number of singular value val admitted and the maximum ratio between the maximum and minimum
+     * @param  A is the matrix to pseudo-inverse
+     * @param  k is the maximum number of singular values admitted 
+     * @param  eps is the maximum ratio admitted between the max and min singular values
+     * @return Pinv_k_eps_SVD is the pseudo-inverse of A
+     */
+      yarp::sig::Matrix Pinv_k_eps_SVD( const yarp::sig::Matrix& A ,
+                                        const double k,
+     				        const double eps = 1E-4 
+                                      ) {
+					    int r_A = A.rows() ;
+                                            int c_A = A.cols() ;
+                                            int c_U = c_A;
+                                            if(c_U>r_A ) c_U = r_A ;    
+                                            yarp::sig::Matrix U( r_A, c_U )  ;
+                                            yarp::sig::Matrix V( c_A, c_U )  ;
+                                            yarp::sig::Vector S( c_U ) ;  
+                                            yarp::sig::Matrix S_1( c_U , c_U ) ;  
+                                            S_1.zero();
+					    double eps_norm = S(0)*eps ;
+                                            yarp::math::SVD(A, U, S, V );
+					    for(int i = 0 ;  i < S.length() ; i++)
+                                                {
+						  if( (i < k) && !(S(i)<eps_norm) ) 
+						  {
+						      S_1(i,i) = S(i) ; 
+						  }
+						  else
+						  {
+						      S_1(i,i) = 0.0 ;
+						  }
+                                                }   
+					  yarp::sig::Matrix pinv_A = V * S_1 *U.transposed() ;
+					  return pinv_A ;
+                                    }                             
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
         }
 }
 #endif

@@ -126,40 +126,6 @@ namespace locoman {
                                     return Q_mg_matrix ;
                             }                           
                             
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
      /**
      * @brief  Q_ci_wrench compute the derivative of the spatial Jacobian 
      * @param  J_spa_i is a 6xc yarp matrix describing a spatial Jacobian
