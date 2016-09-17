@@ -82,25 +82,25 @@ return Round_M ;
      * @brief  Pinv_Regularized computes the Levemberg Regularized pseudo-inverse of A 
      * @param  A is the matrix to pseudo-inverse
      * @param  k is the regularization factor
-     * @param  filter filters the singular values before computing the inverse of At*A (or A*At, depending by the size of A)
+     * @param  filter_sv filters the singular values before computing the inverse of At*A (or A*At, depending by the size of A)
      * @return Pinv_Regularized is the pseudo-inverse of A
      */ 
       yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix& A ,
                                           const double k,
-					  const double filter = 1E-7
+					  const double filter_sv = 1E-7 
                                         ) {
                                             int r_A = A.rows() ;
                                             int c_A = A.cols() ;
                                             if(c_A< r_A ){    // tall matrix => Defective manipulator
                                             yarp::sig::Matrix At_A = A.transposed()*A ;
                                             yarp::sig::Matrix Eye_temp_l = yarp::math::eye(At_A.rows(), At_A.cols() ) ;
-                                            yarp::sig::Matrix pinv_A_l = locoman::utils::Pinv_trunc_SVD(At_A + k*Eye_temp_l , filter ) * A.transposed() ;
+                                            yarp::sig::Matrix pinv_A_l = locoman::utils::Pinv_trunc_SVD(At_A + k*Eye_temp_l , filter_sv ) * A.transposed() ;
                                             return pinv_A_l ;
                                             }
                                             else {    // fat (or square) matrix => Redundant (or square) manipulator
                                             yarp::sig::Matrix A_At = A*A.transposed() ;
                                             yarp::sig::Matrix Eye_temp_r = yarp::math::eye( A_At.rows(), A_At.cols() ) ;
-                                            yarp::sig::Matrix pinv_A_r = A.transposed()* locoman::utils::Pinv_trunc_SVD(A_At + k*Eye_temp_r , filter )  ;
+                                            yarp::sig::Matrix pinv_A_r = A.transposed()* locoman::utils::Pinv_trunc_SVD(A_At + k*Eye_temp_r , filter_sv )  ;
                                             return pinv_A_r ;
                                             }
                                         }     
@@ -320,7 +320,7 @@ return Round_M ;
      * @return filter_k_eps_SVD is the filtered version of A
      */
       yarp::sig::Matrix filter_k_eps_SVD( const yarp::sig::Matrix& A ,
-                                          const double k,
+                                          const int k,
 					  const double eps = 1E-4 
                                       ) {
                                             int r_A = A.rows() ;
@@ -358,7 +358,7 @@ return Round_M ;
      * @return Pinv_k_SVD is the pseudo-inverse of A
      */
       yarp::sig::Matrix Pinv_k_SVD( const yarp::sig::Matrix& A ,
-                                    const double k
+                                    const int k
                                       ) {
 					    int r_A = A.rows() ;
                                             int c_A = A.cols() ;
@@ -395,7 +395,7 @@ return Round_M ;
      * @return Pinv_k_eps_SVD is the pseudo-inverse of A
      */
       yarp::sig::Matrix Pinv_k_eps_SVD( const yarp::sig::Matrix& A ,
-                                        const double k,
+                                        const int k,
      				        const double eps = 1E-4 
                                       ) {
 					    int r_A = A.rows() ;
@@ -423,23 +423,7 @@ return Round_M ;
 					  yarp::sig::Matrix pinv_A = V * S_1 *U.transposed() ;
 					  return pinv_A ;
                                     }                             
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
+                           
                                     
         }
 }

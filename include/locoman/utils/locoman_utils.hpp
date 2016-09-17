@@ -927,6 +927,27 @@ namespace locoman {
     }   
      
      /**
+     * @brief  provide the desired contact force distribution => 50% on the left/right Hand
+     * @return  0 if ok
+     */
+     int FC_DES_center_hands( yarp::sig::Vector& FC_DES_hands, double mg_hands ) {
+                            // On the left hand
+                            FC_DES_hands[1]  = - (mg_hands/8.0 ) ; // Left Hand
+                            FC_DES_hands[4]  = - (mg_hands/8.0 ) ;
+                            FC_DES_hands[7]  = - (mg_hands/8.0 ) ;
+                            FC_DES_hands[10] = - (mg_hands/8.0 ) ;
+                            // On the right hand
+                            FC_DES_hands[13] =  (mg_hands/8.0 ) ;
+                            FC_DES_hands[16] =  (mg_hands/8.0 ) ;
+                            FC_DES_hands[19] =  (mg_hands/8.0 ) ;
+                            FC_DES_hands[22] =  (mg_hands/8.0 ) ; 
+                            //     
+                            return 0 ; // FC_DES_hands ;
+    }   
+     
+     
+     
+     /**
      * @brief  easy way for rotating the right shoulder 
      * @param alpha rotation angle [rad], angluar step at each loop
      * @return the uptated joint vector configuration 

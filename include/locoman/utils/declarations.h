@@ -8,12 +8,27 @@ namespace locoman {
         namespace utils {
         yarp::sig::Matrix RoundMatrix( const yarp::sig::Matrix& M, const int k);
         yarp::sig::Matrix Pinv_trunc_SVD( const yarp::sig::Matrix& A, const double k);
-        yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix& A, const double k );
+        yarp::sig::Matrix Pinv_Regularized( const yarp::sig::Matrix& A, const double k , const double filter_sv );
         yarp::sig::Matrix Pinv_Marq( const yarp::sig::Matrix& A, const double k );
         yarp::sig::Vector x_Pinv_Iter( const yarp::sig::Matrix& A ,const yarp::sig::Vector& b ,double n);
         yarp::sig::Matrix orth_SVD( const yarp::sig::Matrix& A ,const double k);
         yarp::sig::Matrix null_SVD( const yarp::sig::Matrix& A, const double k);
         yarp::sig::Matrix filter_SVD( const yarp::sig::Matrix& A, const double k);
+
+        yarp::sig::Matrix Pinv_k_eps_SVD( const yarp::sig::Matrix& A ,
+                                        const int k,
+     				        const double eps 
+                                      );
+      yarp::sig::Matrix Pinv_k_SVD( const yarp::sig::Matrix& A ,
+                                    const int k
+                                      );
+      yarp::sig::Matrix filter_k_eps_SVD( const yarp::sig::Matrix& A ,
+				    const int k,
+				    const double eps 
+                                      ) ;
+      yarp::sig::Matrix filter_k_th_SVD( const yarp::sig::Matrix& A ,
+				    const int k 
+                                      );
 
         yarp::sig::Matrix getRot( const yarp::sig::Matrix& T_ab) ;
         yarp::sig::Vector getTrasl( const yarp::sig::Matrix& T_ab) ;
@@ -107,6 +122,7 @@ namespace locoman {
         int FC_DES_right( yarp::sig::Vector& FC_DES, double mg  );
         int FC_DES_left( yarp::sig::Vector& FC_DES, double mg   ) ;
         int FC_DES_center( yarp::sig::Vector& FC_DES, double mg );
+	int FC_DES_center_hands( yarp::sig::Vector& FC_DES_hands, double mg_hands ) ; 
         yarp::sig::Vector moving_right_arm( const double alpha,
                                             RobotUtils& robot,
                                             bool flag_robot
