@@ -294,13 +294,25 @@ namespace locoman {
      * @return respect to the world
      */
      yarp::sig::Matrix AW_world_posture( iDynUtils& model , 
-                                         RobotUtils& robot  ) {
+                                         RobotUtils& robot, bool SIMULATION_ROBOTRAN = false ) {
                                                     yarp::sig::Vector zero_3(3, 0.0) ;
                                                     int imu_link_index = model.iDyn3_model.getLinkIndex("imu_link") ; 
                                                     yarp::sig::Matrix T_w_imu_0 = model.iDyn3_model.getPosition( imu_link_index ) ;    
                                                     yarp::sig::Matrix T_imu_w_0 = locoman::utils::iHomogeneous(T_w_imu_0) ; 
-                                                    RobotUtils::IMUPtr IMU_ptr = robot.getIMU()  ;
-                                                    yarp::sig::Vector IMU_sense = IMU_ptr->sense(); ;
+                                                    
+                                                    yarp::sig::Vector IMU_sense;
+
+                                                    if (SIMULATION_ROBOTRAN) 
+                                                    {
+                                                            IMU_sense[3] = 0;     //IMU_waist[0]; // HACK CHECK CONSISTENCY
+                                                            IMU_sense[4] = 0;     //IMU_waist[0]; // HACK CHECK CONSISTENCY
+                                                            IMU_sense[5] = -9.81;  //IMU_waist[0]; // HACK CHECK CONSISTENCY
+                                                    }
+                                                    else
+                                                    {
+                                                        RobotUtils::IMUPtr IMU_ptr = robot.getIMU()  ;
+                                                        IMU_sense = IMU_ptr->sense(); ;
+                                                    }
                                                     yarp::sig::Vector IMU_sense_lin_acc(3) ; 
                                                             
                                                     IMU_sense_lin_acc[0] = IMU_sense[3] ;    
