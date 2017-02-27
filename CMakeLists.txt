@@ -22,10 +22,11 @@ endif()
 
 FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
+FIND_PACKAGE(urdf REQUIRED)
 # to avoid header not found when using idynutils 
 FIND_PACKAGE(Eigen3 REQUIRED)
 
-INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${idynutils_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(include ${YARP_INCLUDE_DIRS} ${idynutils_INCLUDE_DIRS} ${urdf_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 # for every file in INCLUDES CMake already sets the property HEADER_FILE_ONLY
 file(GLOB_RECURSE ${PROJECT_NAME}_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/locoman/utils" *.h*)
@@ -33,7 +34,7 @@ file(GLOB_RECURSE ${PROJECT_NAME}_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include/
 ADD_LIBRARY(${PROJECT_NAME} SHARED  src/locoman_utils.cpp
                         	    ${${PROJECT_NAME}_INCLUDES})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}   ${YARP_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}   ${YARP_LIBRARIES} ${idynutils_LIBRARIES} ${urdf_LIBRARIES})
 
 ##############################################################################
 # use YCM to export LOCOMAN_UTILS so that it can be found using find_package #
