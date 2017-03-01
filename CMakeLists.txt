@@ -18,7 +18,9 @@ else()
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BUILD_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH "/usr/share/cmake/Modules")
+#message(${CMAKE_MODULE_PATH})
 
 FIND_PACKAGE(YARP REQUIRED)
 FIND_PACKAGE(idynutils REQUIRED)
